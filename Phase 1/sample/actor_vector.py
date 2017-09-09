@@ -77,4 +77,5 @@ class ActorTag(object):
 
 if __name__ == "__main__":
     obj = ActorTag()
-    obj.merge_movie_actor_and_tag()
+    log.info(obj.get_imdb_actor_info_data().info())
+    # obj.merge_movie_actor_and_tag()
