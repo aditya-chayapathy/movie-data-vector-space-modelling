@@ -24,13 +24,13 @@ class ActorTag(object):
         mltags = self.extract_data.data_extractor("mltags.csv")
         return mltags.reset_index()
 
+    def get_mlmovies_data(self):
+        mltags = self.extract_data.data_extractor("mlmovies.csv")
+        return mltags.reset_index()
+
     def get_genome_tags_data(self):
         genome_tags = self.extract_data.data_extractor("genome-tags.csv")
         return genome_tags.reset_index()
-
-    def get_imdb_actor_info_data(self):
-        imdb_actor_info = self.extract_data.data_extractor("imdb-actor-info.csv")
-        return imdb_actor_info.reset_index()
 
     def assign_tf_weight(self, data_frame):
         counter = Counter()
