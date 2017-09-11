@@ -15,7 +15,7 @@ class ExtractData(object):
 
     def data_extractor(self, file_name):
         file_loc = os.path.join(self.file_path, file_name)
-        data_frame = pd.DataFrame.from_csv(file_loc)
+        data_frame = pd.read_csv(file_loc)
         return data_frame
 
 
@@ -25,4 +25,4 @@ if __name__ == "__main__":
     extract_data = ExtractData(data_set_location)
     data_frame = extract_data.data_extractor("mlmovies.csv")
     log.info("File columns for mlmovies.csv")
-    log.info("Index = %s, Columns = %s" % (data_frame.index.name, data_frame.columns.values))
+    log.info("Columns = %s" % (data_frame.columns.values))
