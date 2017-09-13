@@ -1,8 +1,6 @@
 import logging
-import os
-from collections import Counter
-
-import pandas as pd
+import math
+import time
 
 import config
 import extractor
@@ -18,15 +16,15 @@ class ActorTag(object):
 
     def get_movie_actor_data(self):
         movie_actor = self.extract_data.data_extractor("movie-actor.csv")
-        return movie_actor.reset_index()
+        return movie_actor
 
     def get_mltags_data(self):
         mltags = self.extract_data.data_extractor("mltags.csv")
-        return mltags.reset_index()
+        return mltags
 
     def get_genome_tags_data(self):
         genome_tags = self.extract_data.data_extractor("genome-tags.csv")
-        return genome_tags.reset_index()
+        return genome_tags
 
     def get_combined_data(self):
         mltags = self.get_mltags_data()
@@ -34,59 +32,125 @@ class ActorTag(object):
         movie_actor = self.get_movie_actor_data()
 
         temp = mltags.merge(genome_tags, left_on="tagid", right_on="tagId", how="left")
-        del temp['index_x']
-        del temp['index_y']
         del temp['tagId']
 
         result = temp.merge(movie_actor, on="movieid", how="left")
-        del result['index']
 
         return result
 
-    def assign_tf_weight(self, data_frame):
-        counter = Counter()
-        for each in data_frame.tag:
-            counter[each] += 1
-        total = sum(counter.values())
-        for each in counter:
-            counter[each] = (counter[each] / total) * 100
-        return dict(counter)
+    def get_combined_data_for_actor(self, actor_id):
+        actor_data = self.get_combined_data()
+        result = actor_data.loc[actor_data["actorid"] == actor_id]
+        del result['actorid']
+        return result
 
-    def assign_weight(self, data_frame):
-        data_frame = data_frame.drop(["userid", "movieid"], axis=1)
-        actor_tag_dict = {}
-        tf_weight_dict = self.assign_tf_weight(data_frame)
-        groupby_actor_dict = data_frame.groupby("name")
-        for actorid, tag_df in groupby_actor_dict:
-            if tag_df.tag.isnull().all():
-                actor_tag_dict[actorid] = "No tag data found"
-            else:
-                tag_df_len = len(tag_df.index)
-                tag_df = tag_df.sort_values("timestamp", ascending=False)
-                tag_df = tag_df.reset_index()
-                tag_df["value"] = pd.Series(
-                    [(((index / tag_df_len) * 100) + tf_weight_dict[tag] - rank) for index, tag, rank
-                     in zip(tag_df.index, tag_df.tag, tag_df.actor_movie_rank)], index=tag_df.index)
-                tag_df["total"] = tag_df.groupby(['tag'])['value'].transform('sum')
-                tag_df = tag_df.drop_duplicates("tag").sort_values("total", ascending=False)
-                actor_tag_dict[actorid] = dict(zip(tag_df.tag, tag_df.total))
-        actor_tag_data_frame = pd.DataFrame.from_dict(list(actor_tag_dict.items()))
-        return actor_tag_data_frame
+    def get_weighted_tags_for_actor_and_model(self, actor_id, model):
+        result = {}
+        actor_data = self.get_combined_data_for_actor(actor_id)
+        tags = actor_data['tag'].unique()
+        for tag in tags:
+            sum = 0
+            movies = actor_data['movieid'].unique()
+            for movie in movies:
+                a = self.get_actor_rank_value(actor_id, movie)
+                tags_movie_data = actor_data[actor_data['movieid'] == movie]
+                tags_of_movie = tags_movie_data['tag'].unique()
+                for tag_of_movie in tags_of_movie:
+                    m = self.get_model_value(actor_id, movie, tag_of_movie, model)
+                    timestamps_tags_movie_data = tags_movie_data['timestamp'].unique
+                    for timestamp in timestamps_tags_movie_data:
+                        t = self.get_timestamp_value(timestamp)
+                        sum = sum + t + m + a
+            result[tag] = sum
 
-    def merge_movie_actor_and_tag(self):
-        mov_act = self.get_movie_actor_data()
-        ml_tag = self.get_mltags_data()
-        genome_tag = self.get_genome_tags_data()
-        actor_info = self.get_imdb_actor_info_data()
-        actor_movie_info = mov_act.merge(actor_info, how="left", on="actorid")
-        tag_data_frame = ml_tag.merge(genome_tag, how="left", left_on="tagid", right_on="tagId")
-        merged_data_frame = actor_movie_info.merge(tag_data_frame, how="left", on="movieid")
-        actor_tag_data_frame = self.assign_weight(merged_data_frame)
-        actor_tag_data_frame.columns = ['actor_name', 'tags']
-        actor_tag_data_frame.to_csv(os.path.join(self.data_set_location, "ACT_TAG.csv"), index=False)
+        return result
+
+    def get_model_value(self, actor_id, movie_id, tag_of_movie, model):
+        if model == "tf":
+            return self.get_tf_value(actor_id, movie_id, tag_of_movie)
+        else:
+            return self.get_tfidf_value(actor_id, tag_of_movie)
+
+    def get_tf_value(self, actor_id, movie_id, tag_of_movie):
+        actor_data = self.get_combined_data_for_actor(actor_id)
+        doc_data = actor_data[actor_data['movieid'] == movie_id]
+        tag_data = doc_data[doc_data['tag'] == tag_of_movie]
+        total_tags_count = doc_data.shape[0]
+        tag_count = tag_data.shape[0]
+        return float(tag_count) / float(total_tags_count)
+
+    def get_idf_value(self, actor_id, tag_of_movie):
+        actor_data = self.get_combined_data_for_actor(actor_id)
+        movies = actor_data['movieid'].unique()
+        doc_count = len(movies)
+
+        tag_count = 0
+        for movie in movies:
+            movie_data = actor_data[actor_data['movieid'] == movie]
+            unique_tags = movie_data['tag'].unique()
+            for tag in unique_tags:
+                if tag == tag_of_movie:
+                    tag_count += 1
+                    break
+
+        return math.log(float(doc_count) / float(tag_count))
+
+    def get_tfidf_value(self, actor_id, movie_id, tag_of_movie):
+        return self.get_tf_value(actor_id, movie_id, tag_of_movie) * self.get_idf_value(actor_id, tag_of_movie)
+
+    def get_epoc_timestamp_for_date(self, timestamp):
+        return int(time.mktime(time.strptime(timestamp, "%%Y-%m-%d %H:%M:%S")))
+
+    def get_timestamp_value(self, timestamp):
+        combined_data = self.get_combined_data()
+        timestamps = combined_data['timestamp'].unique()
+        all_ts = []
+        for ts in timestamps:
+            all_ts.append(self.get_epoc_timestamp_for_date(ts))
+
+        input_ts = self.get_epoc_timestamp_for_date(timestamp)
+
+        mininum = all_ts.min()
+        maximum = all_ts.max()
+
+        number_of_divisions = 10
+        interval = (maximum - mininum) / number_of_divisions
+        value = 0
+        upper_bound = 0
+        while True:
+            if input_ts <= mininum - 1:
+                break
+            upper_bound += interval
+            value += number_of_divisions
+
+        return value
+
+    def get_actor_rank_value(self, actor_id, movie_id):
+        combined_data = self.get_combined_data()
+        movie_data = combined_data[combined_data['movieid'] == movie_id]
+        ranks = movie_data['actor_movie_rank'].unique()
+        mininum = ranks.min()
+        maximum = ranks.max()
+
+        number_of_divisions = 10
+        interval = (maximum - mininum) / number_of_divisions
+        actor_rank = movie_data[movie_data['actorid'] == actor_id]['actor_movie_rank'].unique()[0]
+
+        value = 0
+        upper_bound = mininum - 1
+        while True:
+            if actor_rank <= upper_bound:
+                break
+            upper_bound += interval
+            value += number_of_divisions
+
+        return value
 
 
 if __name__ == "__main__":
     obj = ActorTag()
-    obj.get_combined_data()
-    # obj.merge_movie_actor_and_tag()
+    # print obj.get_tf_value(579260, 5857, "true story")
+    # print obj.get_idf_value(579260, "violent")
+    print obj.get_actor_rank_value(579260, 5857)
+    # print obj.get_weighted_tags_for_actor_and_model(5857, "tfidf")
+    # print obj.get_weighted_tags_for_actor_and_model(579260, "tf")
