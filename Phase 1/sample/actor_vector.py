@@ -99,7 +99,7 @@ class ActorTag(object):
         return self.get_tf_value(actor_id, movie_id, tag_of_movie) * self.get_idf_value(actor_id, tag_of_movie)
 
     def get_epoc_timestamp_for_date(self, timestamp):
-        return int(time.mktime(time.strptime(timestamp, "%%Y-%m-%d %H:%M:%S")))
+        return int(time.mktime(time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")))
 
     def get_timestamp_value(self, timestamp):
         combined_data = self.get_combined_data()
@@ -110,18 +110,18 @@ class ActorTag(object):
 
         input_ts = self.get_epoc_timestamp_for_date(timestamp)
 
-        mininum = all_ts.min()
-        maximum = all_ts.max()
+        mininum = min(all_ts)
+        maximum = max(all_ts)
 
         number_of_divisions = 10
         interval = (maximum - mininum) / number_of_divisions
         value = 0
-        upper_bound = 0
+        upper_bound = mininum - 1
         while True:
-            if input_ts <= mininum - 1:
+            if input_ts <= upper_bound:
                 break
             upper_bound += interval
-            value += number_of_divisions
+            value += 1
 
         return value
 
@@ -129,8 +129,8 @@ class ActorTag(object):
         combined_data = self.get_combined_data()
         movie_data = combined_data[combined_data['movieid'] == movie_id]
         ranks = movie_data['actor_movie_rank'].unique()
-        mininum = ranks.min()
-        maximum = ranks.max()
+        mininum = min(ranks)
+        maximum = max(ranks)
 
         number_of_divisions = 10
         interval = (maximum - mininum) / number_of_divisions
@@ -142,7 +142,7 @@ class ActorTag(object):
             if actor_rank <= upper_bound:
                 break
             upper_bound += interval
-            value += number_of_divisions
+            value += 10
 
         return value
 
@@ -151,6 +151,6 @@ if __name__ == "__main__":
     obj = ActorTag()
     # print obj.get_tf_value(579260, 5857, "true story")
     # print obj.get_idf_value(579260, "violent")
-    print obj.get_actor_rank_value(579260, 5857)
-    # print obj.get_weighted_tags_for_actor_and_model(5857, "tfidf")
+    # print obj.get_timestamp_value("2007-08-27 18:16:41")
+    print obj.get_weighted_tags_for_actor_and_model(5857, "tfidf")
     # print obj.get_weighted_tags_for_actor_and_model(579260, "tf")
