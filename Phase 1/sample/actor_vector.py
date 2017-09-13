@@ -24,13 +24,24 @@ class ActorTag(object):
         mltags = self.extract_data.data_extractor("mltags.csv")
         return mltags.reset_index()
 
-    def get_mlmovies_data(self):
-        mltags = self.extract_data.data_extractor("mlmovies.csv")
-        return mltags.reset_index()
-
     def get_genome_tags_data(self):
         genome_tags = self.extract_data.data_extractor("genome-tags.csv")
         return genome_tags.reset_index()
+
+    def get_combined_data(self):
+        mltags = self.get_mltags_data()
+        genome_tags = self.get_genome_tags_data()
+        movie_actor = self.get_movie_actor_data()
+
+        temp = mltags.merge(genome_tags, left_on="tagid", right_on="tagId", how="left")
+        del temp['index_x']
+        del temp['index_y']
+        del temp['tagId']
+
+        result = temp.merge(movie_actor, on="movieid", how="left")
+        del result['index']
+
+        return result
 
     def assign_tf_weight(self, data_frame):
         counter = Counter()
@@ -77,5 +88,5 @@ class ActorTag(object):
 
 if __name__ == "__main__":
     obj = ActorTag()
-    log.info(obj.get_imdb_actor_info_data().info())
+    obj.get_combined_data()
     # obj.merge_movie_actor_and_tag()
