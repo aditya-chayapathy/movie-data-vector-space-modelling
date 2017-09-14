@@ -57,9 +57,9 @@ class UserTag(object):
 
     def get_model_value(self, user_id, movie_id, tag_of_movie, model):
         if model == "tf":
-            return self.get_tf_value(user_id, movie_id, tag_of_movie) * 1000
+            return self.get_tf_value(user_id, movie_id, tag_of_movie) * 100
         elif model == "tfidf":
-            return self.get_tfidf_value(user_id, movie_id, tag_of_movie) * 1000
+            return self.get_tfidf_value(user_id, movie_id, tag_of_movie) * 100
         else:
             exit(1)
 
@@ -120,7 +120,7 @@ class UserTag(object):
 
 if __name__ == "__main__":
     obj = UserTag()
-    print "TF-IDF values for user : 20\n"
-    result = obj.get_weighted_tags_for_user_and_model(20, "tfidf")
+    print "TF-IDF values for user : 146\n"
+    result = obj.get_weighted_tags_for_user_and_model(146, "tfidf")
     for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
         print "%s: %s" % (key, value)
