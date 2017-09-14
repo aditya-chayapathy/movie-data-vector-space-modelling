@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 conf = config.ParseConfig()
 
 
-class GenreTag(object):
+class UserTag(object):
     def __init__(self):
         self.data_set_location = conf.config_section_mapper("filePath").get("data_set_location")
         self.extract_data = extractor.ExtractData(self.data_set_location)
@@ -67,9 +67,9 @@ class GenreTag(object):
 
     def get_model_value(self, genre, movie_id, tag_of_movie, model):
         if model == "tf":
-            return self.get_tf_value(genre, movie_id, tag_of_movie) * 100
+            return self.get_tf_value(genre, movie_id, tag_of_movie) * 1000
         elif model == "tfidf":
-            return self.get_tfidf_value(genre, movie_id, tag_of_movie) * 100
+            return self.get_tfidf_value(genre, movie_id, tag_of_movie) * 1000
         else:
             exit(1)
 
@@ -130,7 +130,7 @@ class GenreTag(object):
 
 if __name__ == "__main__":
     obj = GenreTag()
-    print "TF-IDF values for genre : Thriller\n"
+    print "TF-IDF values for genre : Children\n"
     result = obj.get_weighted_tags_for_genre_and_model("Thriller", "tfidf")
     for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
         print "%s: %s" % (key, value)
