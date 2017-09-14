@@ -2,6 +2,8 @@ import logging
 import math
 import time
 
+import pandas as pd
+
 import config
 import extractor
 
@@ -45,31 +47,29 @@ class ActorTag(object):
         return result
 
     def get_weighted_tags_for_actor_and_model(self, actor_id, model):
-        result = {}
         actor_data = self.get_combined_data_for_actor(actor_id)
-        tags = actor_data['tag'].unique()
-        for tag in tags:
-            sum = 0
-            movies = actor_data['movieid'].unique()
-            for movie in movies:
-                a = self.get_actor_rank_value(actor_id, movie)
-                tags_movie_data = actor_data[actor_data['movieid'] == movie]
-                tags_of_movie = tags_movie_data['tag'].unique()
-                for tag_of_movie in tags_of_movie:
-                    m = self.get_model_value(actor_id, movie, tag_of_movie, model)
-                    timestamps_tags_movie_data = tags_movie_data['timestamp'].unique
-                    for timestamp in timestamps_tags_movie_data:
-                        t = self.get_timestamp_value(timestamp)
-                        sum = sum + t + m + a
-            result[tag] = sum
+        for index, row in actor_data.iterrows():
+            movie_id = row['movieid']
+            tag = row['tag']
+            timestamp = row['timestamp']
+            row_weight = self.get_actor_rank_value(actor_id, movie_id) + self.get_timestamp_value(
+                timestamp) + self.get_model_value(actor_id, movie_id, tag, model)
+            actor_data['row_weight'] = pd.Series(row_weight, index=actor_data.index)
+
+        tag_group = actor_data.groupby(['tag'])
+        result = {}
+        for tag, df in tag_group:
+            result[tag] = sum(df['row_weight'])
 
         return result
 
     def get_model_value(self, actor_id, movie_id, tag_of_movie, model):
         if model == "tf":
-            return self.get_tf_value(actor_id, movie_id, tag_of_movie)
+            return self.get_tf_value(actor_id, movie_id, tag_of_movie) * 100
+        elif model == "tfidf":
+            return self.get_tfidf_value(actor_id, movie_id, tag_of_movie) * 100
         else:
-            return self.get_tfidf_value(actor_id, tag_of_movie)
+            exit(1)
 
     def get_tf_value(self, actor_id, movie_id, tag_of_movie):
         actor_data = self.get_combined_data_for_actor(actor_id)
@@ -113,10 +113,10 @@ class ActorTag(object):
         mininum = min(all_ts)
         maximum = max(all_ts)
 
-        number_of_divisions = 10
+        number_of_divisions = 100
         interval = (maximum - mininum) / number_of_divisions
         value = 0
-        upper_bound = mininum - 1
+        upper_bound = mininum
         while True:
             if input_ts <= upper_bound:
                 break
@@ -137,14 +137,14 @@ class ActorTag(object):
         actor_rank = movie_data[movie_data['actorid'] == actor_id]['actor_movie_rank'].unique()[0]
 
         value = 0
-        upper_bound = mininum - 1
+        upper_bound = mininum
         while True:
             if actor_rank <= upper_bound:
                 break
             upper_bound += interval
             value += 10
 
-        return value
+        return 100 - value
 
 
 if __name__ == "__main__":
@@ -152,5 +152,9 @@ if __name__ == "__main__":
     # print obj.get_tf_value(579260, 5857, "true story")
     # print obj.get_idf_value(579260, "violent")
     # print obj.get_timestamp_value("2007-08-27 18:16:41")
-    print obj.get_weighted_tags_for_actor_and_model(5857, "tfidf")
+    # print obj.get_combined_data_for_actor(579260)
+    result = obj.get_weighted_tags_for_actor_and_model(579260, "tfidf")
+    for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
+        print "%s: %s" % (key, value)
+        # print obj.get_weighted_tags_for_actor_and_model(254211, "tf")
     # print obj.get_weighted_tags_for_actor_and_model(579260, "tf")
