@@ -1,4 +1,6 @@
 import logging
+import math
+import time
 
 import pandas as pd
 
@@ -63,88 +65,67 @@ class GenreTag(object):
 
         return result
 
-        # def get_model_value(self, actor_id, movie_id, tag_of_movie, model):
-        #     if model == "tf":
-        #         return self.get_tf_value(actor_id, movie_id, tag_of_movie) * 1000
-        #     elif model == "tfidf":
-        #         return self.get_tfidf_value(actor_id, movie_id, tag_of_movie) * 1000
-        #     else:
-        #         exit(1)
-        #
-        # def get_tf_value(self, actor_id, movie_id, tag_of_movie):
-        #     actor_data = self.get_combined_data_for_actor(actor_id)
-        #     doc_data = actor_data[actor_data['movieid'] == movie_id]
-        #     tag_data = doc_data[doc_data['tag'] == tag_of_movie]
-        #     total_tags_count = doc_data.shape[0]
-        #     tag_count = tag_data.shape[0]
-        #     return float(tag_count) / float(total_tags_count)
-        #
-        # def get_idf_value(self, actor_id, tag_of_movie):
-        #     actor_data = self.get_combined_data_for_actor(actor_id)
-        #     movies = actor_data['movieid'].unique()
-        #     doc_count = len(movies)
-        #
-        #     tag_count = 0
-        #     for movie in movies:
-        #         movie_data = actor_data[actor_data['movieid'] == movie]
-        #         unique_tags = movie_data['tag'].unique()
-        #         for tag in unique_tags:
-        #             if tag == tag_of_movie:
-        #                 tag_count += 1
-        #                 break
-        #
-        #     return math.log(float(doc_count) / float(tag_count))
-        #
-        # def get_tfidf_value(self, actor_id, movie_id, tag_of_movie):
-        #     return self.get_tf_value(actor_id, movie_id, tag_of_movie) * self.get_idf_value(actor_id, tag_of_movie)
-        #
-        # def get_epoc_timestamp_for_date(self, timestamp):
-        #     return int(time.mktime(time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")))
-        #
-        # def get_timestamp_value(self, timestamp):
-        #     combined_data = self.get_combined_data()
-        #     timestamps = combined_data['timestamp'].unique()
-        #     all_ts = []
-        #     for ts in timestamps:
-        #         all_ts.append(self.get_epoc_timestamp_for_date(ts))
-        #
-        #     input_ts = self.get_epoc_timestamp_for_date(timestamp)
-        #
-        #     mininum = min(all_ts)
-        #     maximum = max(all_ts)
-        #
-        #     number_of_divisions = 100
-        #     interval = (maximum - mininum) / number_of_divisions
-        #     value = 0
-        #     upper_bound = mininum
-        #     while True:
-        #         if input_ts <= upper_bound:
-        #             break
-        #         upper_bound += interval
-        #         value += 1
-        #
-        #     return value
-        #
-        # def get_actor_rank_value(self, actor_id, movie_id):
-        #     combined_data = self.get_combined_data()
-        #     movie_data = combined_data[combined_data['movieid'] == movie_id]
-        #     ranks = movie_data['actor_movie_rank'].unique()
-        #     mininum = min(ranks)
-        #     maximum = max(ranks)
-        #
-        #     number_of_divisions = 10
-        #     interval = (maximum - mininum) / number_of_divisions
-        #     actor_rank = movie_data[movie_data['actorid'] == actor_id]['actor_movie_rank'].unique()[0]
-        #
-        #     value = 0
-        #     upper_bound = mininum
-        #     while True:
-        #         if actor_rank <= upper_bound:
-        #             break
-        #         upper_bound += interval
-        #         value += 10
-        #
-        #     return 100 - value
+    def get_model_value(self, genre, movie_id, tag_of_movie, model):
+        if model == "tf":
+            return self.get_tf_value(genre, movie_id, tag_of_movie) * 1000
+        elif model == "tfidf":
+            return self.get_tfidf_value(genre, movie_id, tag_of_movie) * 1000
+        else:
+            exit(1)
+
+    def get_tf_value(self, genre, movie_id, tag_of_movie):
+        genre_data = self.get_combined_data_for_genre(genre)
+        doc_data = genre_data[genre_data['movieid'] == movie_id]
+        tag_data = doc_data[doc_data['tag'] == tag_of_movie]
+        total_tags_count = doc_data.shape[0]
+        tag_count = tag_data.shape[0]
+        return float(tag_count) / float(total_tags_count)
+
+    def get_idf_value(self, genre, tag_of_movie):
+        genre_data = self.get_combined_data_for_genre(genre)
+        movies = genre_data['movieid'].unique()
+        doc_count = len(movies)
+
+        tag_count = 0
+        for movie in movies:
+            movie_data = genre_data[genre_data['movieid'] == movie]
+            unique_tags = movie_data['tag'].unique()
+            for tag in unique_tags:
+                if tag == tag_of_movie:
+                    tag_count += 1
+                    break
+
+        return math.log(float(doc_count) / float(tag_count))
+
+    def get_tfidf_value(self, genre, movie_id, tag_of_movie):
+        return self.get_tf_value(genre, movie_id, tag_of_movie) * self.get_idf_value(genre, tag_of_movie)
+
+    def get_epoc_timestamp_for_date(self, timestamp):
+        return int(time.mktime(time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")))
+
+    def get_timestamp_value(self, timestamp):
+        combined_data = self.get_combined_data()
+        timestamps = combined_data['timestamp'].unique()
+        all_ts = []
+        for ts in timestamps:
+            all_ts.append(self.get_epoc_timestamp_for_date(ts))
+
+        input_ts = self.get_epoc_timestamp_for_date(timestamp)
+
+        mininum = min(all_ts)
+        maximum = max(all_ts)
+
+        number_of_divisions = 100
+        interval = (maximum - mininum) / number_of_divisions
+        value = 0
+        upper_bound = mininum
+        while True:
+            if input_ts <= upper_bound:
+                break
+            upper_bound += interval
+            value += 1
+
+        return value
 
 
 if __name__ == "__main__":
