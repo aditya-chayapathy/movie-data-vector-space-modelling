@@ -107,7 +107,7 @@ class UserTag(object):
 
         number_of_divisions = 100
         interval = (maximum - mininum) / number_of_divisions
-        value = 0
+        value = 0.01
         upper_bound = mininum
         while True:
             if input_ts <= upper_bound:

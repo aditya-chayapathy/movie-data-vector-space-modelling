@@ -116,7 +116,7 @@ class ActorTag(object):
 
         number_of_divisions = 100
         interval = (maximum - mininum) / number_of_divisions
-        value = 0.0
+        value = 0.01
         upper_bound = mininum
         while True:
             if input_ts <= upper_bound:
@@ -137,7 +137,7 @@ class ActorTag(object):
         interval = (maximum - mininum) / number_of_divisions
         actor_rank = movie_data[movie_data['actorid'] == actor_id]['actor_movie_rank'].unique()[0]
 
-        value = 0
+        value = 0.0
         upper_bound = mininum
         while True:
             if actor_rank <= upper_bound:
@@ -151,7 +151,6 @@ class ActorTag(object):
 if __name__ == "__main__":
     obj = ActorTag()
     print "TF-IDF values for actor DiCaprio (actor_id:579260)\n"
-    # result = obj.get_weighted_tags_for_actor_and_model(579260, "tfidf")
-    # for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
-    #     print "%s: %s" % (key, value)
-    print "Timestamp = %s" % (obj.get_timestamp_value("2009-01-04 18:58:49"))
+    result = obj.get_weighted_tags_for_actor_and_model(579260, "tfidf")
+    for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
+        print "%s: %s" % (key, value)
