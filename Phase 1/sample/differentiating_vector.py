@@ -124,9 +124,10 @@ class DifferentiatingGenreTag(object):
 #         return value
 #
 #
-# if __name__ == "__main__":
-#     obj = GenreTag()
-#     print "TF-IDF values for genre : Thriller\n"
-#     result = obj.get_weighted_tags_for_genre_and_model("Thriller", "tfidf")
-#     for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
-#         print "%s: %s" % (key, value)
+if __name__ == "__main__":
+    obj = DifferentiatingGenreTag()
+    print "TF-IDF values for genre : Thriller and genre : Children\n"
+    print obj.get_combined_data_for_genre("Thriller", "Children")
+    # result = obj.get_weighted_tags_for_genres_and_model("Thriller", "Children", "tfidf")
+    # for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
+    #     print "%s: %s" % (key, value)
