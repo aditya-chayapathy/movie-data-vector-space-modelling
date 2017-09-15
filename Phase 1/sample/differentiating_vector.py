@@ -53,7 +53,7 @@ class DifferentiatingGenreTag(object):
         result = genre_data[genre_data['genres'].str.contains(genre)]
         return result
 
-    def get_weighted_tags_for_genre_and_model(self, genre1, genre2, model):
+    def get_weighted_tags_for_genres_and_model(self, genre1, genre2, model):
         genre_data = self.get_combined_data_for_genres(genre1, genre2)
         for index, row in genre_data.iterrows():
             movie_id = row['movieid']
@@ -93,7 +93,10 @@ class DifferentiatingGenreTag(object):
         tag_data = doc_data[doc_data['tag'] == tag_of_movie]
         total_tags_count = doc_data.shape[0]
         tag_count = tag_data.shape[0]
-        return float(tag_count) / float(total_tags_count)
+        if total_tags_count == 0:
+            return 0
+        else:
+            return float(tag_count) / float(total_tags_count)
 
     def get_idf_value(self, genre1, genre2, tag_of_movie):
         genre_data = self.get_combined_data_for_genres(genre1, genre2)
@@ -114,8 +117,8 @@ class DifferentiatingGenreTag(object):
 
 if __name__ == "__main__":
     obj = DifferentiatingGenreTag()
-    print "TF-IDF values for genre : Thriller and genre : Children\n"
-    print obj.get_combined_data_for_genres("Thriller", "Children")
-    # result = obj.get_weighted_tags_for_genres_and_model("Thriller", "Children", "tfidf")
-    # for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
-    #     print "%s: %s" % (key, value)
+    print "TF-IDF-DIFF values for genres 'Thriller' and 'Children':\n"
+    # result = obj.get_weighted_tags_for_genres_and_model("Thriller", "Children", "tfidfdiff")
+    result = obj.get_weighted_tags_for_genres_and_model("Animation", "Children", "tfidfdiff")
+    for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
+        print "%s: %s" % (key, value)

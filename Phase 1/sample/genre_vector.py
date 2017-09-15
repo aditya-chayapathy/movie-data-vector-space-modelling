@@ -55,7 +55,7 @@ class GenreTag(object):
             movie_id = row['movieid']
             tag = row['tag']
             timestamp = row['timestamp']
-            row_weight = self.get_timestamp_value(timestamp) + self.get_model_value(genre, movie_id, tag, model)
+            row_weight = self.get_timestamp_value(timestamp) * self.get_model_value(genre, movie_id, tag, model) * 100
             genre_data['row_weight'] = pd.Series(row_weight, index=genre_data.index)
 
         tag_group = genre_data.groupby(['tag'])
@@ -67,9 +67,9 @@ class GenreTag(object):
 
     def get_model_value(self, genre, movie_id, tag_of_movie, model):
         if model == "tf":
-            return self.get_tf_value(genre, movie_id, tag_of_movie) * 100
+            return self.get_tf_value(genre, movie_id, tag_of_movie)
         elif model == "tfidf":
-            return self.get_tfidf_value(genre, movie_id, tag_of_movie) * 100
+            return self.get_tfidf_value(genre, movie_id, tag_of_movie)
         else:
             exit(1)
 
@@ -123,7 +123,7 @@ class GenreTag(object):
             if input_ts <= upper_bound:
                 break
             upper_bound += interval
-            value += 1
+            value += 0.01
 
         return value
 

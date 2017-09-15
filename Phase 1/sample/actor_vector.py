@@ -53,8 +53,8 @@ class ActorTag(object):
             movie_id = row['movieid']
             tag = row['tag']
             timestamp = row['timestamp']
-            row_weight = self.get_actor_rank_value(actor_id, movie_id) + self.get_timestamp_value(
-                timestamp) + self.get_model_value(actor_id, movie_id, tag, model)
+            row_weight = self.get_actor_rank_value(actor_id, movie_id) * self.get_timestamp_value(
+                timestamp) * self.get_model_value(actor_id, movie_id, tag, model) * 100
             actor_data['row_weight'] = pd.Series(row_weight, index=actor_data.index)
 
         tag_group = actor_data.groupby(['tag'])
@@ -66,9 +66,9 @@ class ActorTag(object):
 
     def get_model_value(self, actor_id, movie_id, tag_of_movie, model):
         if model == "tf":
-            return self.get_tf_value(actor_id, movie_id, tag_of_movie) * 1000
+            return self.get_tf_value(actor_id, movie_id, tag_of_movie)
         elif model == "tfidf":
-            return self.get_tfidf_value(actor_id, movie_id, tag_of_movie) * 1000
+            return self.get_tfidf_value(actor_id, movie_id, tag_of_movie)
         else:
             exit(1)
 
@@ -116,13 +116,13 @@ class ActorTag(object):
 
         number_of_divisions = 100
         interval = (maximum - mininum) / number_of_divisions
-        value = 0
+        value = 0.0
         upper_bound = mininum
         while True:
             if input_ts <= upper_bound:
                 break
             upper_bound += interval
-            value += 1
+            value += 0.01
 
         return value
 
@@ -143,14 +143,15 @@ class ActorTag(object):
             if actor_rank <= upper_bound:
                 break
             upper_bound += interval
-            value += 10
+            value += 0.1
 
-        return 100 - value
+        return 1.1 - value
 
 
 if __name__ == "__main__":
     obj = ActorTag()
     print "TF-IDF values for actor DiCaprio (actor_id:579260)\n"
-    result = obj.get_weighted_tags_for_actor_and_model(579260, "tfidf")
-    for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
-        print "%s: %s" % (key, value)
+    # result = obj.get_weighted_tags_for_actor_and_model(579260, "tfidf")
+    # for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
+    #     print "%s: %s" % (key, value)
+    print "Timestamp = %s" % (obj.get_timestamp_value("2009-01-04 18:58:49"))

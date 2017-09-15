@@ -45,7 +45,7 @@ class UserTag(object):
             movie_id = row['movieid']
             tag = row['tag']
             timestamp = row['timestamp']
-            row_weight = self.get_timestamp_value(timestamp) + self.get_model_value(user_id, movie_id, tag, model)
+            row_weight = self.get_timestamp_value(timestamp) * self.get_model_value(user_id, movie_id, tag, model) * 100
             user_data['row_weight'] = pd.Series(row_weight, index=user_data.index)
 
         tag_group = user_data.groupby(['tag'])
@@ -57,9 +57,9 @@ class UserTag(object):
 
     def get_model_value(self, user_id, movie_id, tag_of_movie, model):
         if model == "tf":
-            return self.get_tf_value(user_id, movie_id, tag_of_movie) * 100
+            return self.get_tf_value(user_id, movie_id, tag_of_movie)
         elif model == "tfidf":
-            return self.get_tfidf_value(user_id, movie_id, tag_of_movie) * 100
+            return self.get_tfidf_value(user_id, movie_id, tag_of_movie)
         else:
             exit(1)
 
@@ -113,7 +113,7 @@ class UserTag(object):
             if input_ts <= upper_bound:
                 break
             upper_bound += interval
-            value += 1
+            value += 0.01
 
         return value
 
