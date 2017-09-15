@@ -78,6 +78,12 @@ class DifferentiatingGenreTag(object):
         else:
             exit(1)
 
+    def get_pdiff1_value(self, genre1, genre2, movie_id, tag_of_movie):
+        return 1
+
+    def get_pdiff2_value(self, genre1, genre2, movie_id, tag_of_movie):
+        return 2
+
     def get_tfidfdiff_value(self, genre1, genre2, movie_id, tag_of_movie):
         return self.get_tf_value(genre1, movie_id, tag_of_movie) * self.get_idf_value(genre1, genre2, tag_of_movie)
 
