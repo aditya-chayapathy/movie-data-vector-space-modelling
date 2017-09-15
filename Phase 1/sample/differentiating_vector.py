@@ -1,4 +1,5 @@
 import logging
+import math
 
 import pandas as pd
 
@@ -47,6 +48,11 @@ class DifferentiatingGenreTag(object):
         result = genre_data[genre_data['genres'].str.contains(genre1) | genre_data['genres'].str.contains(genre2)]
         return result
 
+    def get_combined_data_for_genre(self, genre):
+        genre_data = self.get_combined_data()
+        result = genre_data[genre_data['genres'].str.contains(genre)]
+        return result
+
     def get_weighted_tags_for_genre_and_model(self, genre1, genre2, model):
         genre_data = self.get_combined_data_for_genres(genre1, genre2)
         for index, row in genre_data.iterrows():
@@ -62,40 +68,42 @@ class DifferentiatingGenreTag(object):
 
         return result
 
-    def get_model_value(self, genre, movie_id, tag_of_movie, model):
+    def get_model_value(self, genre1, genre2, movie_id, tag_of_movie, model):
         if model == "tfidfdiff":
-            return self.get_tf_value(genre, movie_id, tag_of_movie) * 100
-        elif model == "tfidf":
-            return self.get_tfidf_value(genre, movie_id, tag_of_movie) * 100
+            return self.get_tfidfdiff_value(genre1, genre2, movie_id, tag_of_movie) * 100
+        elif model == "pdiff1":
+            return self.get_pdiff1_value(genre1, genre2, movie_id, tag_of_movie) * 100
+        elif model == "pdiff2":
+            return self.get_pdiff2_value(genre1, genre2, movie_id, tag_of_movie) * 100
         else:
             exit(1)
 
-#     def get_tf_value(self, genre, movie_id, tag_of_movie):
-#         genre_data = self.get_combined_data_for_genre(genre)
-#         doc_data = genre_data[genre_data['movieid'] == movie_id]
-#         tag_data = doc_data[doc_data['tag'] == tag_of_movie]
-#         total_tags_count = doc_data.shape[0]
-#         tag_count = tag_data.shape[0]
-#         return float(tag_count) / float(total_tags_count)
-#
-#     def get_idf_value(self, genre, tag_of_movie):
-#         genre_data = self.get_combined_data_for_genre(genre)
-#         movies = genre_data['movieid'].unique()
-#         doc_count = len(movies)
-#
-#         tag_count = 0
-#         for movie in movies:
-#             movie_data = genre_data[genre_data['movieid'] == movie]
-#             unique_tags = movie_data['tag'].unique()
-#             for tag in unique_tags:
-#                 if tag == tag_of_movie:
-#                     tag_count += 1
-#                     break
-#
-#         return math.log(float(doc_count) / float(tag_count))
-#
-#     def get_tfidf_value(self, genre, movie_id, tag_of_movie):
-#         return self.get_tf_value(genre, movie_id, tag_of_movie) * self.get_idf_value(genre, tag_of_movie)
+    def get_tfidfdiff_value(self, genre1, genre2, movie_id, tag_of_movie):
+        return self.get_tf_value(genre1, movie_id, tag_of_movie) * self.get_idf_value(genre1, genre2, tag_of_movie)
+
+    def get_tf_value(self, genre, movie_id, tag_of_movie):
+        genre_data = self.get_combined_data_for_genre(genre)
+        doc_data = genre_data[genre_data['movieid'] == movie_id]
+        tag_data = doc_data[doc_data['tag'] == tag_of_movie]
+        total_tags_count = doc_data.shape[0]
+        tag_count = tag_data.shape[0]
+        return float(tag_count) / float(total_tags_count)
+
+    def get_idf_value(self, genre1, genre2, tag_of_movie):
+        genre_data = self.get_combined_data_for_genres(genre1, genre2)
+        movies = genre_data['movieid'].unique()
+        doc_count = len(movies)
+
+        tag_count = 0
+        for movie in movies:
+            movie_data = genre_data[genre_data['movieid'] == movie]
+            unique_tags = movie_data['tag'].unique()
+            for tag in unique_tags:
+                if tag == tag_of_movie:
+                    tag_count += 1
+                    break
+
+        return math.log(float(doc_count) / float(tag_count))
 
 
 if __name__ == "__main__":
