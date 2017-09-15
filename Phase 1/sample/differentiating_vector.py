@@ -1,5 +1,7 @@
 import logging
 
+import pandas as pd
+
 import config
 import extractor
 
@@ -40,35 +42,34 @@ class DifferentiatingGenreTag(object):
 
         return result
 
-    def get_combined_data_for_genre(self, genre1, genre2):
+    def get_combined_data_for_genres(self, genre1, genre2):
         genre_data = self.get_combined_data()
         result = genre_data[genre_data['genres'].str.contains(genre1) | genre_data['genres'].str.contains(genre2)]
         return result
 
-# def get_weighted_tags_for_genre_and_model(self, genre, model):
-#         genre_data = self.get_combined_data_for_genre(genre)
-#         for index, row in genre_data.iterrows():
-#             movie_id = row['movieid']
-#             tag = row['tag']
-#             timestamp = row['timestamp']
-#             row_weight = self.get_timestamp_value(timestamp) + self.get_model_value(genre, movie_id, tag, model)
-#             genre_data['row_weight'] = pd.Series(row_weight, index=genre_data.index)
-#
-#         tag_group = genre_data.groupby(['tag'])
-#         result = {}
-#         for tag, df in tag_group:
-#             result[tag] = sum(df['row_weight'])
-#
-#         return result
-#
-#     def get_model_value(self, genre, movie_id, tag_of_movie, model):
-#         if model == "tf":
-#             return self.get_tf_value(genre, movie_id, tag_of_movie) * 100
-#         elif model == "tfidf":
-#             return self.get_tfidf_value(genre, movie_id, tag_of_movie) * 100
-#         else:
-#             exit(1)
-#
+    def get_weighted_tags_for_genre_and_model(self, genre1, genre2, model):
+        genre_data = self.get_combined_data_for_genres(genre1, genre2)
+        for index, row in genre_data.iterrows():
+            movie_id = row['movieid']
+            tag = row['tag']
+            row_weight = self.get_model_value(genre1, genre2, movie_id, tag, model)
+            genre_data['row_weight'] = pd.Series(row_weight, index=genre_data.index)
+
+        tag_group = genre_data.groupby(['tag'])
+        result = {}
+        for tag, df in tag_group:
+            result[tag] = sum(df['row_weight'])
+
+        return result
+
+    def get_model_value(self, genre, movie_id, tag_of_movie, model):
+        if model == "tfidfdiff":
+            return self.get_tf_value(genre, movie_id, tag_of_movie) * 100
+        elif model == "tfidf":
+            return self.get_tfidf_value(genre, movie_id, tag_of_movie) * 100
+        else:
+            exit(1)
+
 #     def get_tf_value(self, genre, movie_id, tag_of_movie):
 #         genre_data = self.get_combined_data_for_genre(genre)
 #         doc_data = genre_data[genre_data['movieid'] == movie_id]
@@ -100,7 +101,7 @@ class DifferentiatingGenreTag(object):
 if __name__ == "__main__":
     obj = DifferentiatingGenreTag()
     print "TF-IDF values for genre : Thriller and genre : Children\n"
-    print obj.get_combined_data_for_genre("Thriller", "Children")
+    print obj.get_combined_data_for_genres("Thriller", "Children")
     # result = obj.get_weighted_tags_for_genres_and_model("Thriller", "Children", "tfidf")
     # for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
     #     print "%s: %s" % (key, value)
