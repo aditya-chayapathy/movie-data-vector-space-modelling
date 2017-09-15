@@ -95,35 +95,8 @@ class DifferentiatingGenreTag(object):
 #
 #     def get_tfidf_value(self, genre, movie_id, tag_of_movie):
 #         return self.get_tf_value(genre, movie_id, tag_of_movie) * self.get_idf_value(genre, tag_of_movie)
-#
-#     def get_epoc_timestamp_for_date(self, timestamp):
-#         return int(time.mktime(time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")))
-#
-#     def get_timestamp_value(self, timestamp):
-#         combined_data = self.get_combined_data()
-#         timestamps = combined_data['timestamp'].unique()
-#         all_ts = []
-#         for ts in timestamps:
-#             all_ts.append(self.get_epoc_timestamp_for_date(ts))
-#
-#         input_ts = self.get_epoc_timestamp_for_date(timestamp)
-#
-#         mininum = min(all_ts)
-#         maximum = max(all_ts)
-#
-#         number_of_divisions = 100
-#         interval = (maximum - mininum) / number_of_divisions
-#         value = 0
-#         upper_bound = mininum
-#         while True:
-#             if input_ts <= upper_bound:
-#                 break
-#             upper_bound += interval
-#             value += 1
-#
-#         return value
-#
-#
+
+
 if __name__ == "__main__":
     obj = DifferentiatingGenreTag()
     print "TF-IDF values for genre : Thriller and genre : Children\n"
