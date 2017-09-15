@@ -11,6 +11,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 conf = config.ParseConfig()
 
+
 class ActorTag(object):
     def __init__(self):
         self.data_set_location = conf.config_section_mapper("filePath").get("data_set_location")
