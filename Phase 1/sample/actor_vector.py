@@ -1,5 +1,4 @@
 import logging
-import math
 
 import generic_vector
 import utils
@@ -12,8 +11,9 @@ class ActorTag(generic_vector.GenericTag):
     def __init__(self, actor_id):
         super(ActorTag, self).__init__(actor_id)
         self.combined_data = self.get_combined_data()
-        self.time_utils = utils.TimestampUtils(self.combined_data)
         self.actor_data = self.get_combined_data_for_object()
+        self.time_utils = utils.TimestampUtils(self.combined_data)
+        self.model_utils = utils.ModelUtils(self.actor_data)
 
     def get_combined_data(self):
         mltags = self.data_extractor.get_mltags_data()
@@ -52,36 +52,11 @@ class ActorTag(generic_vector.GenericTag):
 
     def get_model_value(self, movie_id, tag_of_movie, model):
         if model == "tf":
-            return self.get_tf_value(movie_id, tag_of_movie) * 100
+            return self.model_utils.get_tf_value(movie_id, tag_of_movie) * 100
         elif model == "tfidf":
-            return self.get_tfidf_value(movie_id, tag_of_movie) * 100
+            return self.model_utils.get_tfidf_value(movie_id, tag_of_movie) * 100
         else:
             exit(1)
-
-    def get_tf_value(self, movie_id, tag_of_movie):
-        doc_data = self.actor_data[self.actor_data['movieid'] == movie_id]
-        tag_data = doc_data[doc_data['tag'] == tag_of_movie]
-        total_tags_count = doc_data.shape[0]
-        tag_count = tag_data.shape[0]
-        return float(tag_count) / float(total_tags_count)
-
-    def get_idf_value(self, tag_of_movie):
-        movies = self.actor_data['movieid'].unique()
-        doc_count = len(movies)
-
-        tag_count = 0
-        for movie in movies:
-            movie_data = self.actor_data[self.actor_data['movieid'] == movie]
-            unique_tags = movie_data['tag'].unique()
-            for tag in unique_tags:
-                if tag == tag_of_movie:
-                    tag_count += 1
-                    break
-
-        return math.log(float(doc_count) / float(tag_count))
-
-    def get_tfidf_value(self, movie_id, tag_of_movie):
-        return self.get_tf_value(movie_id, tag_of_movie) * self.get_idf_value(tag_of_movie)
 
     def get_actor_rank_value(self, movie_id):
         movie_data = self.combined_data[self.combined_data['movieid'] == movie_id]
