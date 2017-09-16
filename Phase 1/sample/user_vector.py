@@ -2,8 +2,6 @@ import logging
 import math
 import time
 
-import pandas as pd
-
 import config
 import extractor
 
@@ -41,13 +39,15 @@ class UserTag(object):
 
     def get_weighted_tags_for_user_and_model(self, user_id, model):
         user_data = self.get_combined_data_for_user(user_id)
+        row_weights = []
         for index, row in user_data.iterrows():
             movie_id = row['movieid']
             tag = row['tag']
             timestamp = row['timestamp']
             row_weight = self.get_timestamp_value(timestamp) * self.get_model_value(user_id, movie_id, tag, model) * 100
-            user_data['row_weight'] = pd.Series(row_weight, index=user_data.index)
+            row_weights.append(row_weight)
 
+        user_data['row_weight'] = row_weights
         tag_group = user_data.groupby(['tag'])
         result = {}
         for tag, df in tag_group:
@@ -121,6 +121,6 @@ class UserTag(object):
 if __name__ == "__main__":
     obj = UserTag()
     print "TF-IDF values for user : 146\n"
-    result = obj.get_weighted_tags_for_user_and_model(146, "tfidf")
+    result = obj.get_weighted_tags_for_user_and_model(109, "tf")
     for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
         print "%s: %s" % (key, value)

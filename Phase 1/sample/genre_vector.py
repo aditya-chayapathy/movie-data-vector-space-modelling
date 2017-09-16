@@ -2,8 +2,6 @@ import logging
 import math
 import time
 
-import pandas as pd
-
 import config
 import extractor
 
@@ -51,13 +49,15 @@ class GenreTag(object):
 
     def get_weighted_tags_for_genre_and_model(self, genre, model):
         genre_data = self.get_combined_data_for_genre(genre)
+        row_weights = []
         for index, row in genre_data.iterrows():
             movie_id = row['movieid']
             tag = row['tag']
             timestamp = row['timestamp']
             row_weight = self.get_timestamp_value(timestamp) * self.get_model_value(genre, movie_id, tag, model) * 100
-            genre_data['row_weight'] = pd.Series(row_weight, index=genre_data.index)
+            row_weights.append(row_weight)
 
+        genre_data['row_weight'] = row_weight
         tag_group = genre_data.groupby(['tag'])
         result = {}
         for tag, df in tag_group:

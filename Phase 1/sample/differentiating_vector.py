@@ -1,8 +1,6 @@
 import logging
 import math
 
-import pandas as pd
-
 import config
 import extractor
 
@@ -55,12 +53,14 @@ class DifferentiatingGenreTag(object):
 
     def get_weighted_tags_for_genres_and_model(self, genre1, genre2, model):
         genre_data = self.get_combined_data_for_genres(genre1, genre2)
+        row_weights = []
         for index, row in genre_data.iterrows():
             movie_id = row['movieid']
             tag = row['tag']
             row_weight = self.get_model_value(genre1, genre2, movie_id, tag, model)
-            genre_data['row_weight'] = pd.Series(row_weight, index=genre_data.index)
+            row_weights.append(row_weight)
 
+        genre_data['row_weight'] = row_weights
         tag_group = genre_data.groupby(['tag'])
         result = {}
         for tag, df in tag_group:
@@ -118,7 +118,7 @@ class DifferentiatingGenreTag(object):
 if __name__ == "__main__":
     obj = DifferentiatingGenreTag()
     print "TF-IDF-DIFF values for genres 'Thriller' and 'Children':\n"
+    result = obj.get_weighted_tags_for_genres_and_model("Children", "Thriller", "tfidfdiff")
     # result = obj.get_weighted_tags_for_genres_and_model("Thriller", "Children", "tfidfdiff")
-    result = obj.get_weighted_tags_for_genres_and_model("Animation", "Children", "tfidfdiff")
     for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
         print "%s: %s" % (key, value)
