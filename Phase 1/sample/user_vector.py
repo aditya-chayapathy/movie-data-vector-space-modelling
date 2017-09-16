@@ -71,8 +71,8 @@ class UserTag(object):
         tag_count = tag_data.shape[0]
         return float(tag_count) / float(total_tags_count)
 
-    def get_idf_value(self, user_data, tag_of_movie):
-        user_data = self.get_combined_data_for_user(user_data)
+    def get_idf_value(self, user_id, tag_of_movie):
+        user_data = self.get_combined_data_for_user(user_id)
         movies = user_data['movieid'].unique()
         doc_count = len(movies)
 
