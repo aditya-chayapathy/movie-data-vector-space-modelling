@@ -1,7 +1,7 @@
 import argparse
 
 parser = argparse.ArgumentParser(
-    description='differentiate_genre.py Thriller Children',
+    description='differentiate_genre.py Thriller Children tfidf',
 )
 parser.add_argument('genre1', action="store", type=str)
 parser.add_argument('genre2', action="store", type=str)

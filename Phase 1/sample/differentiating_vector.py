@@ -1,25 +1,20 @@
 import logging
 import math
 
-import config_parser
-import extractor
+import generic_differentiating_vector
 import utils
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
-conf = config_parser.ParseConfig()
 
 
-class DifferentiatingGenreTag(object):
+class DifferentiatingGenreTag(generic_differentiating_vector.GenericDifferentiateTag):
     def __init__(self, genre1, genre2):
-        self.data_set_location = conf.config_section_mapper("filePath").get("data_set_location")
-        self.data_extractor = extractor.DataExtractor(self.data_set_location)
-        self.genre1 = genre1
-        self.genre2 = genre2
+        super(DifferentiatingGenreTag, self).__init__(genre1, genre2)
         self.combined_data = self.get_combined_data()
-        self.genres_data = self.get_combined_data_for_genres(genre1, genre2)
-        self.genre1_data = self.get_combined_data_for_genre(genre1)
-        self.genre2_data = self.get_combined_data_for_genre(genre2)
+        self.genres_data = self.get_combined_data_for_genres()
+        self.genre1_data = self.get_combined_data_for_object(genre1)
+        self.genre2_data = self.get_combined_data_for_object(genre2)
         self.time_utils = utils.TimestampUtils(self.combined_data)
 
     def get_combined_data(self):
@@ -37,12 +32,13 @@ class DifferentiatingGenreTag(object):
 
         return result
 
-    def get_combined_data_for_genres(self, genre1, genre2):
+    def get_combined_data_for_genres(self):
         result = self.combined_data[
-            self.combined_data['genres'].str.contains(genre1) | self.combined_data['genres'].str.contains(genre2)]
+            self.combined_data['genres'].str.contains(self.object_id1) | self.combined_data['genres'].str.contains(
+                self.object_id2)]
         return result
 
-    def get_combined_data_for_genre(self, genre):
+    def get_combined_data_for_object(self, genre):
         result = self.combined_data[self.combined_data['genres'].str.contains(genre)]
         return result
 
@@ -51,9 +47,12 @@ class DifferentiatingGenreTag(object):
         for index, row in self.genres_data.iterrows():
             movie_id = row['movieid']
             tag = row['tag']
-            row_weight = self.get_model_value(self.genre1, self.genre2, movie_id, tag, model)
+            timestamp = row['timestamp']
+            row_weight = self.get_model_value(self.object_id1, self.object_id2, movie_id, tag,
+                                              model) + self.time_utils.get_timestamp_value(timestamp)
             row_weights.append(row_weight)
 
+        self.genres_data.is_copy = False
         self.genres_data['row_weight'] = row_weights
         tag_group = self.genres_data.groupby(['tag'])
         result = {}
@@ -62,13 +61,13 @@ class DifferentiatingGenreTag(object):
 
         return result
 
-    def get_model_value(self, genre1, genre2, movie_id, tag_of_movie, model):
+    def get_model_value(self, movie_id, tag_of_movie, model):
         if model == "tfidfdiff":
-            return self.get_tfidfdiff_value(genre1, genre2, movie_id, tag_of_movie) * 100
+            return self.get_tfidfdiff_value(self.object_id1, self.object_id2, movie_id, tag_of_movie) * 100
         elif model == "pdiff1":
-            return self.get_pdiff1_value(genre1, genre2, movie_id, tag_of_movie) * 100
+            return self.get_pdiff1_value(self.object_id1, self.object_id2, movie_id, tag_of_movie) * 100
         elif model == "pdiff2":
-            return self.get_pdiff2_value(genre1, genre2, movie_id, tag_of_movie) * 100
+            return self.get_pdiff2_value(self.object_id1, self.object_id2, movie_id, tag_of_movie) * 100
         else:
             exit(1)
 
