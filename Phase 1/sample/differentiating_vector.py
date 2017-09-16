@@ -1,35 +1,31 @@
 import logging
 import math
 
-import config
+import config_parser
 import extractor
+import utils
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
-conf = config.ParseConfig()
+conf = config_parser.ParseConfig()
 
 
 class DifferentiatingGenreTag(object):
-    def __init__(self):
+    def __init__(self, genre1, genre2):
         self.data_set_location = conf.config_section_mapper("filePath").get("data_set_location")
-        self.extract_data = extractor.ExtractData(self.data_set_location)
-
-    def get_mlmovies_data(self):
-        mlmovies = self.extract_data.data_extractor("mlmovies.csv")
-        return mlmovies
-
-    def get_mltags_data(self):
-        mltags = self.extract_data.data_extractor("mltags.csv")
-        return mltags
-
-    def get_genome_tags_data(self):
-        genome_tags = self.extract_data.data_extractor("genome-tags.csv")
-        return genome_tags
+        self.data_extractor = extractor.DataExtractor(self.data_set_location)
+        self.genre1 = genre1
+        self.genre2 = genre2
+        self.combined_data = self.get_combined_data()
+        self.genres_data = self.get_combined_data_for_genres(genre1, genre2)
+        self.genre1_data = self.get_combined_data_for_genre(genre1)
+        self.genre2_data = self.get_combined_data_for_genre(genre2)
+        self.time_utils = utils.TimestampUtils(self.combined_data)
 
     def get_combined_data(self):
-        mltags = self.get_mltags_data()
-        genome_tags = self.get_genome_tags_data()
-        mlmovies = self.get_mlmovies_data()
+        mltags = self.data_extractor.get_mltags_data()
+        genome_tags = self.data_extractor.get_genome_tags_data()
+        mlmovies = self.data_extractor.get_mlmovies_data()
 
         temp = mltags.merge(genome_tags, left_on="tagid", right_on="tagId", how="left")
         del temp['tagId']
@@ -42,26 +38,24 @@ class DifferentiatingGenreTag(object):
         return result
 
     def get_combined_data_for_genres(self, genre1, genre2):
-        genre_data = self.get_combined_data()
-        result = genre_data[genre_data['genres'].str.contains(genre1) | genre_data['genres'].str.contains(genre2)]
+        result = self.combined_data[
+            self.combined_data['genres'].str.contains(genre1) | self.combined_data['genres'].str.contains(genre2)]
         return result
 
     def get_combined_data_for_genre(self, genre):
-        genre_data = self.get_combined_data()
-        result = genre_data[genre_data['genres'].str.contains(genre)]
+        result = self.combined_data[self.combined_data['genres'].str.contains(genre)]
         return result
 
-    def get_weighted_tags_for_genres_and_model(self, genre1, genre2, model):
-        genre_data = self.get_combined_data_for_genres(genre1, genre2)
+    def get_weighted_tags_for_model(self, model):
         row_weights = []
-        for index, row in genre_data.iterrows():
+        for index, row in self.genres_data.iterrows():
             movie_id = row['movieid']
             tag = row['tag']
-            row_weight = self.get_model_value(genre1, genre2, movie_id, tag, model)
+            row_weight = self.get_model_value(self.genre1, self.genre2, movie_id, tag, model)
             row_weights.append(row_weight)
 
-        genre_data['row_weight'] = row_weights
-        tag_group = genre_data.groupby(['tag'])
+        self.genres_data['row_weight'] = row_weights
+        tag_group = self.genres_data.groupby(['tag'])
         result = {}
         for tag, df in tag_group:
             result[tag] = sum(df['row_weight'])
@@ -116,8 +110,8 @@ class DifferentiatingGenreTag(object):
 
 
 if __name__ == "__main__":
-    obj = DifferentiatingGenreTag()
+    obj = DifferentiatingGenreTag("Thriller", "Children")
     print "TF-IDF-DIFF values for genres 'Thriller' and 'Children':\n"
-    result = obj.get_weighted_tags_for_genres_and_model("Thriller", "Children", "tfidfdiff")
+    result = obj.get_weighted_tags_for_model("tfidfdiff")
     for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
         print "%s: %s" % (key, value)

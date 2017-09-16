@@ -18,11 +18,11 @@ class TimestampUtils(object):
         input_ts = self.get_epoc_timestamp_for_date(timestamp)
         number_of_divisions = 100
         interval = (self.max_ts - self.min_ts) / number_of_divisions
-        value = 0.01
+        value = 0.0
         upper_bound = self.min_ts
         while True:
             if input_ts <= upper_bound:
                 break
             upper_bound += interval
             value += 0.01
-        return value
+        return value * 10
