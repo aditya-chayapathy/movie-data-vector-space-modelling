@@ -1,20 +1,17 @@
 import logging
 import math
 
-import config_parser
-import extractor
+import tag_vector
 import utils
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
-conf = config_parser.ParseConfig()
 
 
-class ActorTag(object):
+class ActorTag(tag_vector.Tag):
     def __init__(self, actor_id):
+        super(ActorTag, self).__init__()
         self.actor_id = actor_id
-        self.data_set_location = conf.config_section_mapper("filePath").get("data_set_location")
-        self.data_extractor = extractor.DataExtractor(self.data_set_location)
         self.combined_data = self.get_combined_data()
         self.time_utils = utils.TimestampUtils(self.combined_data)
         self.actor_data = self.get_combined_data_for_actor()
