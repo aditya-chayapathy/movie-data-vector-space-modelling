@@ -7,7 +7,7 @@ class TimestampUtils(object):
         timestamps = combined_data['timestamp'].unique()
         all_ts = []
         for ts in timestamps:
-            all_ts.append(self.get_epoc_timestamp_for_date(ts))
+            all_ts.append(get_epoc_timestamp_for_date(ts))
         self.min_ts = min(all_ts)
         self.max_ts = max(all_ts)
 
