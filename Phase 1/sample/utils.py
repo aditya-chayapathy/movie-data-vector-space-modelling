@@ -15,7 +15,7 @@ class TimestampUtils(object):
         return int(time.mktime(time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")))
 
     def get_timestamp_value(self, timestamp):
-        input_ts = self.get_timestamp_value(timestamp)
+        input_ts = self.get_epoc_timestamp_for_date(timestamp)
         number_of_divisions = 100
         interval = (self.max_ts - self.min_ts) / number_of_divisions
         value = 0.01
