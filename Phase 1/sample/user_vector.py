@@ -38,8 +38,7 @@ class UserTag(object):
             movie_id = row['movieid']
             tag = row['tag']
             timestamp = row['timestamp']
-            row_weight = self.time_utils.get_timestamp_value(timestamp) * self.get_model_value(movie_id, tag,
-                                                                                               model) * 100
+            row_weight = self.time_utils.get_timestamp_value(timestamp) + self.get_model_value(movie_id, tag, model)
             row_weights.append(row_weight)
 
         self.user_data['row_weight'] = row_weights
@@ -52,9 +51,9 @@ class UserTag(object):
 
     def get_model_value(self, movie_id, tag_of_movie, model):
         if model == "tf":
-            return self.get_tf_value(movie_id, tag_of_movie)
+            return self.get_tf_value(movie_id, tag_of_movie) * 100
         elif model == "tfidf":
-            return self.get_tfidf_value(movie_id, tag_of_movie)
+            return self.get_tfidf_value(movie_id, tag_of_movie) * 100
         else:
             exit(1)
 
@@ -87,6 +86,6 @@ class UserTag(object):
 if __name__ == "__main__":
     obj = UserTag(146)
     print "TF-IDF values for user : 146\n"
-    result = obj.get_weighted_tags_for_model("tf")
+    result = obj.get_weighted_tags_for_model("tfidf")
     for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
         print "%s: %s" % (key, value)

@@ -44,9 +44,6 @@ class ActorTag(object):
             timestamp = row['timestamp']
             row_weight = self.get_actor_rank_value(movie_id) + self.time_utils.get_timestamp_value(
                 timestamp) + self.get_model_value(movie_id, tag, model)
-            print "(%s,%s,%s,%s)" % (
-            self.get_actor_rank_value(movie_id), self.time_utils.get_timestamp_value(timestamp),
-            self.get_model_value(movie_id, tag, model), row_weight)
             row_weights.append(row_weight)
 
         self.actor_data['row_weight'] = row_weights
