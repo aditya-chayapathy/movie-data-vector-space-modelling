@@ -112,5 +112,4 @@ if __name__ == "__main__":
     obj = ActorTag(579260)
     print "TF-IDF values for actor DiCaprio (actor_id:579260)\n"
     result = obj.get_weighted_tags_for_model("tfidf")
-    for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
-        print "%s: %s" % (key, value)
+    utils.sort_and_print_dictionary(result)

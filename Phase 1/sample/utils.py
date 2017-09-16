@@ -11,11 +11,8 @@ class TimestampUtils(object):
         self.min_ts = min(all_ts)
         self.max_ts = max(all_ts)
 
-    def get_epoc_timestamp_for_date(self, timestamp):
-        return int(time.mktime(time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")))
-
     def get_timestamp_value(self, timestamp):
-        input_ts = self.get_epoc_timestamp_for_date(timestamp)
+        input_ts = get_epoc_timestamp_for_date(timestamp)
         number_of_divisions = 100
         interval = (self.max_ts - self.min_ts) / number_of_divisions
         value = 0.0
@@ -26,3 +23,12 @@ class TimestampUtils(object):
             upper_bound += interval
             value += 0.01
         return value * 10
+
+
+def get_epoc_timestamp_for_date(timestamp):
+    return int(time.mktime(time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")))
+
+
+def sort_and_print_dictionary(dict):
+    for key, value in sorted(dict.iteritems(), key=lambda (k, v): (v, k), reverse=True):
+        print "%s: %s" % (key, value)

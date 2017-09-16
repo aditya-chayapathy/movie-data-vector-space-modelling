@@ -93,5 +93,4 @@ if __name__ == "__main__":
     obj = GenreTag("Thriller")
     print "TF-IDF values for genre : Thriller\n"
     result = obj.get_weighted_tags_for_model("tfidf")
-    for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
-        print "%s: %s" % (key, value)
+    utils.sort_and_print_dictionary(result)
