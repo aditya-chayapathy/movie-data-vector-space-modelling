@@ -43,6 +43,7 @@ class GenreTag(generic_vector.GenericTag):
             row_weight = self.time_utils.get_timestamp_value(timestamp) + self.get_model_value(movie_id, tag, model)
             row_weights.append(row_weight)
 
+        self.genre_data.is_copy = False
         self.genre_data['row_weight'] = row_weights
         tag_group = self.genre_data.groupby(['tag'])
         result = {}

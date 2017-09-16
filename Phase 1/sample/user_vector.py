@@ -37,6 +37,7 @@ class UserTag(generic_vector.GenericTag):
             row_weight = self.time_utils.get_timestamp_value(timestamp) + self.get_model_value(movie_id, tag, model)
             row_weights.append(row_weight)
 
+        self.user_data.is_copy = False
         self.user_data['row_weight'] = row_weights
         tag_group = self.user_data.groupby(['tag'])
         result = {}

@@ -43,6 +43,7 @@ class ActorTag(generic_vector.GenericTag):
                 timestamp) + self.get_model_value(movie_id, tag, model)
             row_weights.append(row_weight)
 
+        self.actor_data.is_copy = False
         self.actor_data['row_weight'] = row_weights
         tag_group = self.actor_data.groupby(['tag'])
         result = {}
