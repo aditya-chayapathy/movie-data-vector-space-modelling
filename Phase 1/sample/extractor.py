@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 
-class ExtractData(object):
+class DataExtractor(object):
     def __init__(self, file_path):
         self.file_path = file_path
 
@@ -17,6 +17,27 @@ class ExtractData(object):
         file_loc = os.path.join(self.file_path, file_name)
         data_frame = pd.read_csv(file_loc)
         return data_frame
+
+    def get_movie_actor_data(self):
+        return self.data_extractor("movie-actor.csv")
+
+    def get_mltags_data(self):
+        return self.data_extractor("mltags.csv")
+
+    def get_genome_tags_data(self):
+        return self.data_extractor("genome-tags.csv")
+
+    def get_mlmovies_data(self):
+        return self.data_extractor("mlmovies.csv")
+
+    def get_imdb_actor_info_data(self):
+        return self.data_extractor("imdb-actor-info.csv")
+
+    def get_mlratings_data(self):
+        return self.data_extractor("mlratings.csv")
+
+    def get_mlusers_data(self):
+        return self.data_extractor("mlusers.csv")
 
 
 if __name__ == "__main__":
