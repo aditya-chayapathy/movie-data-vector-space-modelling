@@ -18,3 +18,6 @@ class GenericTag(object):
 
     def get_combined_data_for_object(self):
         print "Obtain all relevant data with respect to this model and object"
+
+    def get_model_value(self, movie_id, tag_of_movie, model):
+        print "Obtain the row value for the parameters passed as input"

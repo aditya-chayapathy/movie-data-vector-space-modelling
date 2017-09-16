@@ -38,7 +38,8 @@ class ActorTag(generic_vector.GenericTag):
             movie_id = row['movieid']
             tag = row['tag']
             timestamp = row['timestamp']
-            row_weight = self.get_actor_rank_value(movie_id) + self.time_utils.get_timestamp_value(
+            row_weight = utils.MovieUtils(self.combined_data, movie_id,
+                                          self.object_id).get_actor_rank_value() + self.time_utils.get_timestamp_value(
                 timestamp) + self.get_model_value(movie_id, tag, model)
             row_weights.append(row_weight)
 
@@ -57,26 +58,6 @@ class ActorTag(generic_vector.GenericTag):
             return self.model_utils.get_tfidf_value(movie_id, tag_of_movie) * 100
         else:
             exit(1)
-
-    def get_actor_rank_value(self, movie_id):
-        movie_data = self.combined_data[self.combined_data['movieid'] == movie_id]
-        ranks = movie_data['actor_movie_rank'].unique()
-        min_rank = min(ranks)
-        max_rank = max(ranks)
-
-        number_of_divisions = 10
-        interval = (max_rank - min_rank) / number_of_divisions
-        actor_rank = movie_data[movie_data['actorid'] == self.object_id]['actor_movie_rank'].unique()[0]
-
-        value = 0.0
-        upper_bound = min_rank
-        while True:
-            if actor_rank <= upper_bound:
-                break
-            upper_bound += interval
-            value += 0.1
-
-        return (1.0 - value) * 10
 
 
 if __name__ == "__main__":

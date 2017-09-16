@@ -63,3 +63,30 @@ class ModelUtils(object):
 
     def get_tfidf_value(self, movie_id, tag_of_movie):
         return self.get_tf_value(movie_id, tag_of_movie) * self.get_idf_value(tag_of_movie)
+
+
+class MovieUtils(object):
+    def __init__(self, combined_data, movie_id, actor_id):
+        self.movie_id = movie_id
+        self.combined_data = combined_data
+        self.actor_id = actor_id
+
+    def get_actor_rank_value(self):
+        movie_data = self.combined_data[self.combined_data['movieid'] == self.movie_id]
+        ranks = movie_data['actor_movie_rank'].unique()
+        min_rank = min(ranks)
+        max_rank = max(ranks)
+
+        number_of_divisions = 10
+        interval = (max_rank - min_rank) / number_of_divisions
+        actor_rank = movie_data[movie_data['actorid'] == self.actor_id]['actor_movie_rank'].unique()[0]
+
+        value = 0.0
+        upper_bound = min_rank
+        while True:
+            if actor_rank <= upper_bound:
+                break
+            upper_bound += interval
+            value += 0.1
+
+        return (1.0 - value) * 10
