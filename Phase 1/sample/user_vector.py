@@ -1,20 +1,19 @@
 import logging
 import math
 
-import tag_vector
+import generic_vector
 import utils
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 
-class UserTag(tag_vector.Tag):
+class UserTag(generic_vector.GenericTag):
     def __init__(self, user_id):
-        super(UserTag, self).__init__()
-        self.user_id = user_id
+        super(UserTag, self).__init__(user_id)
         self.combined_data = self.get_combined_data()
         self.time_utils = utils.TimestampUtils(self.combined_data)
-        self.user_data = self.get_combined_data_for_user(self.user_id)
+        self.user_data = self.get_combined_data_for_object()
 
     def get_combined_data(self):
         mltags = self.data_extractor.get_mltags_data()
@@ -25,8 +24,8 @@ class UserTag(tag_vector.Tag):
 
         return result
 
-    def get_combined_data_for_user(self, user_id):
-        result = self.combined_data[self.combined_data['userid'] == user_id]
+    def get_combined_data_for_object(self):
+        result = self.combined_data[self.combined_data['userid'] == self.object_id]
         return result
 
     def get_weighted_tags_for_model(self, model):

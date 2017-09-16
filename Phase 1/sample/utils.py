@@ -1,6 +1,15 @@
 import time
 
 
+def get_epoc_timestamp_for_date(timestamp):
+    return int(time.mktime(time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")))
+
+
+def sort_and_print_dictionary(dict):
+    for key, value in sorted(dict.iteritems(), key=lambda (k, v): (v, k), reverse=True):
+        print "%s: %s" % (key, value)
+
+
 class TimestampUtils(object):
     def __init__(self, combined_data):
         self.combined_data = combined_data
@@ -23,12 +32,3 @@ class TimestampUtils(object):
             upper_bound += interval
             value += 0.01
         return value * 10
-
-
-def get_epoc_timestamp_for_date(timestamp):
-    return int(time.mktime(time.strptime(timestamp, "%Y-%m-%d %H:%M:%S")))
-
-
-def sort_and_print_dictionary(dict):
-    for key, value in sorted(dict.iteritems(), key=lambda (k, v): (v, k), reverse=True):
-        print "%s: %s" % (key, value)

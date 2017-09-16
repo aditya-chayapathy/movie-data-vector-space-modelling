@@ -1,20 +1,19 @@
 import logging
 import math
 
-import tag_vector
+import generic_vector
 import utils
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 
-class ActorTag(tag_vector.Tag):
+class ActorTag(generic_vector.GenericTag):
     def __init__(self, actor_id):
-        super(ActorTag, self).__init__()
-        self.actor_id = actor_id
+        super(ActorTag, self).__init__(actor_id)
         self.combined_data = self.get_combined_data()
         self.time_utils = utils.TimestampUtils(self.combined_data)
-        self.actor_data = self.get_combined_data_for_actor()
+        self.actor_data = self.get_combined_data_for_object()
 
     def get_combined_data(self):
         mltags = self.data_extractor.get_mltags_data()
@@ -28,8 +27,8 @@ class ActorTag(tag_vector.Tag):
 
         return result
 
-    def get_combined_data_for_actor(self):
-        result = self.combined_data[self.combined_data["actorid"] == self.actor_id]
+    def get_combined_data_for_object(self):
+        result = self.combined_data[self.combined_data["actorid"] == self.object_id]
         del result['actorid']
         return result
 
@@ -92,7 +91,7 @@ class ActorTag(tag_vector.Tag):
 
         number_of_divisions = 10
         interval = (max_rank - min_rank) / number_of_divisions
-        actor_rank = movie_data[movie_data['actorid'] == self.actor_id]['actor_movie_rank'].unique()[0]
+        actor_rank = movie_data[movie_data['actorid'] == self.object_id]['actor_movie_rank'].unique()[0]
 
         value = 0.0
         upper_bound = min_rank

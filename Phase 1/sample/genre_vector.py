@@ -1,20 +1,19 @@
 import logging
 import math
 
-import tag_vector
+import generic_vector
 import utils
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 
-class GenreTag(tag_vector.Tag):
+class GenreTag(generic_vector.GenericTag):
     def __init__(self, genre):
-        super(GenreTag, self).__init__()
-        self.genre = genre
+        super(GenreTag, self).__init__(genre)
         self.combined_data = self.get_combined_data()
         self.time_utils = utils.TimestampUtils(self.combined_data)
-        self.genre_data = self.get_combined_data_for_genre()
+        self.genre_data = self.get_combined_data_for_object()
 
     def get_combined_data(self):
         mltags = self.data_extractor.get_mltags_data()
@@ -31,8 +30,8 @@ class GenreTag(tag_vector.Tag):
 
         return result
 
-    def get_combined_data_for_genre(self):
-        result = self.combined_data[self.combined_data['genres'].str.contains(self.genre)]
+    def get_combined_data_for_object(self):
+        result = self.combined_data[self.combined_data['genres'].str.contains(self.object_id)]
         return result
 
     def get_weighted_tags_for_model(self, model):
