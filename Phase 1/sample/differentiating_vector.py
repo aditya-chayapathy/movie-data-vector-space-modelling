@@ -81,35 +81,6 @@ class DifferentiatingGenreTag(generic_differentiating_vector.GenericDifferentiat
         return (self.model_utils_genre1.get_tf_value(movie_id, tag_of_movie) - self.model_utils_genre2.get_tf_value(
             movie_id, tag_of_movie)) * self.model_utils_genres.get_idf_value(tag_of_movie)
 
-        # def get_tf_value(self, movie_id, tag_of_movie):
-        #     genre_data = self.genre1_data
-        #     if genre == self.object_id2:
-        #         genre_data = self.genre2_data
-        #
-        #     doc_data = genre_data[genre_data['movieid'] == movie_id]
-        #     tag_data = doc_data[doc_data['tag'] == tag_of_movie]
-        #     total_tags_count = doc_data.shape[0]
-        #     tag_count = tag_data.shape[0]
-        #     if total_tags_count == 0:
-        #         return 0
-        #     else:
-        #         return float(tag_count) / float(total_tags_count)
-        #
-        # def get_idf_value(self, tag_of_movie):
-        #     movies = self.genres_data['movieid'].unique()
-        #     doc_count = len(movies)
-        #
-        #     tag_count = 0
-        #     for movie in movies:
-        #         movie_data = self.genres_data[self.genres_data['movieid'] == movie]
-        #         unique_tags = movie_data['tag'].unique()
-        #         for tag in unique_tags:
-        #             if tag == tag_of_movie:
-        #                 tag_count += 1
-        #                 break
-        #
-        #     return math.log(float(doc_count) / float(tag_count))
-
 
 if __name__ == "__main__":
     obj = DifferentiatingGenreTag("Thriller", "Children")
