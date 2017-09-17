@@ -1,5 +1,7 @@
 import argparse
 
+import
+
 parser = argparse.ArgumentParser(
     description='differentiate_genre.py Thriller Children tfidf',
 )
@@ -10,4 +12,5 @@ input = vars(parser.parse_args())
 genre1 = input['genre1']
 genre2 = input['genre2']
 model = input['model']
+obj = differentiating_vector.DifferentiatingGenreTag('asd', "asd")
 print genre1, genre2, model

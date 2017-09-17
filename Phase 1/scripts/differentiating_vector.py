@@ -72,6 +72,7 @@ class DifferentiatingGenreTag(generic_differentiating_vector.GenericDifferentiat
             exit(1)
 
     def get_pdiff1_value(self, movie_id, tag_of_movie):
+        r = self.genre1_data
         return 1
 
     def get_pdiff2_value(self, movie_id, tag_of_movie):
@@ -83,7 +84,7 @@ class DifferentiatingGenreTag(generic_differentiating_vector.GenericDifferentiat
 
 
 if __name__ == "__main__":
-    obj = DifferentiatingGenreTag("Thriller", "Children")
+    obj = DifferentiatingGenreTag("Animation", "Thriller")
     print "TF-IDF-DIFF values for genres 'Thriller' and 'Children':\n"
     result = obj.get_weighted_tags_for_model("tfidfdiff")
     for key, value in sorted(result.iteritems(), key=lambda (k, v): (v, k), reverse=True):
