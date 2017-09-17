@@ -22,7 +22,7 @@ class TimestampUtils(object):  # contains all the timestamp related utilities
         self.max_ts = max(all_ts)
 
     def get_timestamp_value(self,
-                            timestamp):  # returns a value between 1 to 10 that represent the weight associated with a timestamp. Newer timestamps are given higher values. The newest timestamp is given a value of 10 while the oldest timestamp us given a value of 0.
+                            timestamp):  # returns a value between 0 to 10 that represent the weight associated with a timestamp. Newer timestamps are given higher values. The latest timestamp is given a value of 10 while the oldest timestamp us given a value of 0.
         input_ts = get_epoc_timestamp_for_date(timestamp)
         number_of_divisions = 100
         interval = (self.max_ts - self.min_ts) / number_of_divisions
