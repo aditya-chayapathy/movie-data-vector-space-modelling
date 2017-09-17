@@ -44,6 +44,8 @@ class ModelUtils(object):
         tag_data = object_doc_data[object_doc_data['tag'] == tag_of_movie]
         total_tags_count = object_doc_data.shape[0]
         tag_count = tag_data.shape[0]
+        if total_tags_count == 0:
+            return 0
         return float(tag_count) / float(total_tags_count)
 
     def get_idf_value(self, tag_of_movie):
