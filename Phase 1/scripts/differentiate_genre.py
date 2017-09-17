@@ -1,6 +1,7 @@
 import argparse
 
-import
+import differentiating_vector
+import utils
 
 parser = argparse.ArgumentParser(
     description='differentiate_genre.py Thriller Children tfidf',
@@ -12,5 +13,6 @@ input = vars(parser.parse_args())
 genre1 = input['genre1']
 genre2 = input['genre2']
 model = input['model']
-obj = differentiating_vector.DifferentiatingGenreTag('asd', "asd")
-print genre1, genre2, model
+print "\n\nTag weights for (%s,%s) in descending order\n\n" % (genre1, genre2)
+obj = differentiating_vector.DifferentiatingGenreTag(genre1, genre2)
+utils.sort_and_print_dictionary(obj.get_weighted_tags_for_model(model))
