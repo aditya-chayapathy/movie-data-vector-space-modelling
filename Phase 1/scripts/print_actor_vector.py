@@ -3,6 +3,7 @@ import argparse
 import actor_vector
 import utils
 
+#  Command line interface for task 1
 parser = argparse.ArgumentParser(
     description='print_actor_vector.py 523452 tfidf',
 )

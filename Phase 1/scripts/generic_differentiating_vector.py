@@ -4,7 +4,7 @@ import extractor
 conf = config_parser.ParseConfig()
 
 
-class GenericDifferentiateTag(object):
+class GenericDifferentiateTag(object):  # Represents an abstract class to differentiate two entities.
     def __init__(self, object_id1, object_id2):
         self.object_id1 = object_id1
         self.object_id2 = object_id2

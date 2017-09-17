@@ -3,6 +3,7 @@ import argparse
 import user_vector
 import utils
 
+#  Command line interface for task 3
 parser = argparse.ArgumentParser(
     description='print_user_vector.py 4323 tfidf',
 )

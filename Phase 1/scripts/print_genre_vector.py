@@ -3,6 +3,7 @@ import argparse
 import genre_vector
 import utils
 
+#  Command line interface for task 2
 parser = argparse.ArgumentParser(
     description='print_genre_vector.py Thriller tfidf',
 )

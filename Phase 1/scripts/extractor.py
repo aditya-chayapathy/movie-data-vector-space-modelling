@@ -13,7 +13,7 @@ class DataExtractor(object):
     def __init__(self, file_path):
         self.file_path = file_path
 
-    def data_extractor(self, file_name):
+    def data_extractor(self, file_name):  # return the data frame with respect to the csv file in 'resources' directory
         file_loc = os.path.join(self.file_path, file_name)
         data_frame = pd.read_csv(file_loc)
         return data_frame

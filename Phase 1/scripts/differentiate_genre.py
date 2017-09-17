@@ -3,6 +3,7 @@ import argparse
 import differentiating_vector
 import utils
 
+#  Command line interface for task 4
 parser = argparse.ArgumentParser(
     description='differentiate_genre.py Thriller Children tfidf',
 )

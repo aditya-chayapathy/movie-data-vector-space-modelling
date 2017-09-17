@@ -11,7 +11,7 @@ class ParseConfig(object):
         self.config = configparser.ConfigParser()
         self.config.read("../config.ini")
 
-    def config_section_mapper(self, section):
+    def config_section_mapper(self, section):  # Code to parse a section of the config.ini file
         dict1 = {}
         options = self.config.options(section)
         for option in options:

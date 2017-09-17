@@ -4,7 +4,8 @@ import extractor
 conf = config_parser.ParseConfig()
 
 
-class GenericTag(object):
+class GenericTag(
+    object):  # Represents an abstract class to establish relationships between tags and entities (users/actors/genres).
     def __init__(self, object_id):
         self.object_id = object_id
         self.data_set_location = conf.config_section_mapper("filePath").get("data_set_location")
