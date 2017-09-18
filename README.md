@@ -1,7 +1,7 @@
 Vector space modeling of MovieLens & IMDB data - Phase 1
 
 Introduction:
-The tasks involve around representing relationships between different entities of the data set. The data set contains information taken from MovieLens and IMDB, pertaining to movies, genres, actors, users and the tags associated by the user to the movies, provided through csv files.
+The tasks involve representing relationships between different entities of the data set. The data set contains information taken from MovieLens and IMDB, pertaining to movies, genres, actors, users and the tags associated by the user to the movies, provided through csv files.
 
 Hardware requirements:
 Operating System: Windows 10 Home
