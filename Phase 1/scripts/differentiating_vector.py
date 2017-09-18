@@ -114,7 +114,7 @@ class DifferentiatingGenreTag(
 
 
 if __name__ == "__main__":
-    obj = DifferentiatingGenreTag("Animation", "Children")
+    obj = DifferentiatingGenreTag("Thriller", "Children")
     print "TF-IDF-DIFF values for genres 'Thriller' and 'Children':\n"
-    result = obj.get_weighted_tags_for_model("pdiff1")
+    result = obj.get_weighted_tags_for_model("tfidfdiff")
     utils.sort_and_print_dictionary(result)
