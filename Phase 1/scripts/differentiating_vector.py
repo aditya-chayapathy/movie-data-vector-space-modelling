@@ -79,35 +79,27 @@ class DifferentiatingGenreTag(
     def get_pdiff1_value(self, tag_of_movie):  # P-DIFF1 calculation
         temp = self.genre1_data[self.genre1_data['tag'] == tag_of_movie]
         r_j_g1 = len(temp['movieid'].unique())
-        temp = self.genre2_data[self.genre2_data['tag'] == tag_of_movie]
-        r_j_g2 = len(temp['movieid'].unique())
         temp = self.genres_data[self.genres_data['tag'] == tag_of_movie]
         m_j = len(temp['movieid'].unique())
-        return self.pdiff_formula(r_j_g1, m_j) - self.pdiff_formula(r_j_g2, m_j)
+        return self.pdiff_formula(r_j_g1, m_j)
 
     def get_pdiff2_value(self, tag_of_movie):  # P-DIFF2 calculation
         movies_containing_tag_data = self.genre2_data[self.genre2_data['tag'] == tag_of_movie]
         movies_containing_tag = movies_containing_tag_data['movieid'].unique()
         temp = self.genre2_data[~self.genre2_data['movieid'].isin(movies_containing_tag)]
         r_j_g1 = len(temp['movieid'].unique())
-        movies_containing_tag_data = self.genre1_data[self.genre1_data['tag'] == tag_of_movie]
-        movies_containing_tag = movies_containing_tag_data['movieid'].unique()
-        temp = self.genre1_data[~self.genre1_data['movieid'].isin(movies_containing_tag)]
-        r_j_g2 = len(temp['movieid'].unique())
         movies_containing_tag_data = self.genres_data[self.genres_data['tag'] == tag_of_movie]
         movies_containing_tag = movies_containing_tag_data['movieid'].unique()
         temp = self.genres_data[~self.genres_data['movieid'].isin(movies_containing_tag)]
         m_j = len(temp['movieid'].unique())
-        return self.pdiff_formula(r_j_g1, m_j) - self.pdiff_formula(r_j_g2, m_j)
+        return self.pdiff_formula(r_j_g1, m_j)
 
     def pdiff_formula(self, r_j, m_j):  # formula calculation with respect to P-DIFF1 and P-DIFF2
-        if r_j == m_j:
-            return 0
         try:
             result = math.log(abs((((r_j + 0.5) / (self.r - r_j + 1))) / (
             ((m_j - r_j + 0.5) / (self.m - m_j - self.r + r_j + 1))))) * abs(
                 ((r_j) / (self.r)) - ((m_j - r_j) / (self.m - self.r)))
-        except ValueError:
+        except:
             return 0
         return result
 
