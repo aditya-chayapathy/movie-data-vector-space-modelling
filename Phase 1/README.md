@@ -1,26 +1,46 @@
-# Vector space modeling of MovieLens & IMDB movie data
+# Vector space modeling of MovieLens & IMDB movie data - Phase 1
 
-This project demonstrates the following Multimedia and Web Database concepts using MovieLens and IMDB movie data: 
- - Multi-dimentional data representation
- - Dimentionality reduction using SVD, LDA and PCA
- - Feature significance using TF and TF-IDF measures
- - Latent semantics analysis using SVD, PCA and LDA
- - Tensor decomposition analysis using CP decomposition
- - Node ranking/significance using Personalized PageRank
- - Movie Recommendation system using SVD, LDA, PCA, Tensor decomposition and PageRank
- - Probablistic Relevance Feedback
- - Multi-dimensional index structures using LSH
- - Nearest neighbor search using LSH
- - Nearest Neighbor based relevance feedback using query rewrite technique
- - Movie classification using SVM, Decision Trees and KNN classifiers
- 
+#### Introduction:
+The tasks involve representing relationships between different entities of the data set. The data set contains information taken from MovieLens and IMDB, pertaining to movies, genres, actors, users and the tags associated by the user to the movies, provided through csv files.
 
+#### Software requirements:
+Python 2.7.13 :: Anaconda 4.4.0 (64-bit)
 
-Phase 1 - Multi-dimentional data representation, Feature significance using TF and TF-IDF measures
+#### Directory Structure:
+The project directory structure has the following directories:
+	1. "resources" - contains the csv files that constitute the data set. 
+	2. "scripts" - contains command line interface along with the other supporting scripts needed for the successful execution of the project.
 
-Phase 2 - Dimentionality reduction (SVD, LDA and PCA), Latent semantics analysis (SVD, PCA and LDA), Tensor decomposition analysis using CP decomposition, Node ranking/significance using Personalized PageRank
+#### Execution Steps:
+```
+Help: This describes how to use the command line interface
+Usage: python <command-line-interface> --help
+Example: python print_genre_vector.py --help
 
-Phase 3 - Movie Recommendation system (SVD, LDA, PCA, Tensor decomposition and PageRank), Probablistic Relevance Feedback, Multi-dimensional index structures using LSH, Nearest neighbor search using LSH, Nearest Neighbor based relevance feedback using query rewrite technique, Movie classification (SVM, Decision Trees and KNN classifiers)
+Task 1:
+Command line interface - print_actor_vector.py
+Usage: python print_actor_vector.py <actor_id> <model>
+Example: python print_actor_vector.py 579260 tf
 
+Task 2:
+Command line interface - print_genre_vector.py
+Usage: python print_genre_vector.py <genre> <model>
+Example: python print_genre_vector.py Animation tf
 
-For more details please check the specification present under "specification" folder in each phase directory.
+Task 3:
+Command line interface - print_user_vector.py
+Usage: python print_user_vector.py <user_id> <model>
+Example: python print_user_vector.py 109 tf
+
+Task 4:
+Command line interface - differentiate_genre.py
+Usage: differentiate_genre.py <genre1> <genre2> <model>
+Example: python differentiate_genre.py Children Thriller tf
+```
+
+#### Troubleshooting:
+1. The tag weight calculations are performed dynamically whenever the input is passed to the command line interface. Also, this project uses in-memory data frames (via python pandas library) for storage and retrieval. You may observe delay in the output of the command line interface based on the input. Please be patient.
+2. Please ensure the data set (csv files) have the same names and column descriptors as the sample data set for correct execution.
+3. Ensure you are running the correct python interpreter. The correct interpreter will give the following output on the command line:
+	python --version
+	Python 2.7.13 :: Anaconda 4.4.0 (64-bit)
