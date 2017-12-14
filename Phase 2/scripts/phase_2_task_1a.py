@@ -32,10 +32,10 @@ class LdaGenreTag(GenreTag):
         tag_df = tag_df.sort_values('movieid')
         tag_df = list(tag_df.iloc[:,1])
 
-        (U, Vh) = self.util.LDA(tag_df, num_topics=4, num_features=1000)
+        (U, Vh) = self.util.LDA(tag_df, num_topics=4, num_features=100000)
 
         for latent in Vh:
-            print ("\n")
+            print("\n")
             print(latent)
 
 class SvdGenreTag(GenreTag):

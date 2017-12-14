@@ -226,7 +226,6 @@ if __name__ == "__main__":
     parser.add_argument('user_id', action="store", type=int)
     input = vars(parser.parse_args())
     user_id = input['user_id']
-    #user_id = 3
     obj = UserMovieRecommendation()
     print("Movie recommendation for user id " + str(user_id))
     movies = obj.get_all_movie_recommendations_for_user(user_id)

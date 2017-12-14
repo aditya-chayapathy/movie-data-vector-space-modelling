@@ -304,7 +304,7 @@ class SimilarActorsFromDiffMoviesLda(object):
 
         input_movieid = self.util.get_movie_id(moviename)
 
-        (U, Vh) = self.util.LDA(tag_df, num_topics=5, num_features=1000)
+        (U, Vh) = self.util.LDA(tag_df, num_topics=5, num_features=100000)
 
         movie_topic_matrix = self.util.get_doc_topic_matrix(U, num_docs=len(movies), num_topics=5)
         topic_movie_matrix = movie_topic_matrix.transpose()

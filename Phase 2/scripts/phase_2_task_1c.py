@@ -212,7 +212,7 @@ class LdaActorTag(object):
         actorid_list = tag_df.actorid.tolist()
         tag_df = list(tag_df.iloc[:,1])
 
-        (U, Vh) = self.util.LDA(tag_df, num_topics=5, num_features=1000)
+        (U, Vh) = self.util.LDA(tag_df, num_topics=5, num_features=100000)
 
         actor_topic_matrix = self.util.get_doc_topic_matrix(U, num_docs=len(actorid_list), num_topics=5)
         topic_actor_matrix = actor_topic_matrix.transpose()

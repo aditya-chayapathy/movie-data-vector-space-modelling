@@ -1,3 +1,4 @@
+import logging
 import math
 import os
 
@@ -8,8 +9,7 @@ from config_parser import ParseConfig
 from data_extractor import DataExtractor
 from gensim import corpora
 from scipy import linalg
-from sklearn.preprocessing import StandardScaler
-import logging
+
 logging.getLogger("gensim").setLevel(logging.CRITICAL)
 
 class Util(object):
@@ -195,10 +195,6 @@ class Util(object):
         :return: factor matrices and the core matrix
         """
 
-        # Calculating SVD
-        # Feature Scaling
-       # sc = StandardScaler()
-       # df_sc = sc.fit_transform(matrix[:, :])
         U, s, Vh = linalg.svd(matrix, full_matrices=False)
         return (U, s, Vh)
 
@@ -208,9 +204,6 @@ class Util(object):
         :param matrix:
         :return: factor matrices and the core matrix
         """
-
-        #sc = StandardScaler()
-        #df_sc = sc.fit_transform(matrix[:, :])
 
         # Computng covariance matrix
         cov_df = numpy.cov(matrix, rowvar=False)
@@ -258,9 +251,10 @@ class Util(object):
         u_matrix = numpy.zeros(shape=(num_docs, num_topics))
 
         for i in range(0, len(u)):
-            row1 = u[i]
-            for j in range(0, len(row1)):
-                u_matrix[i, j] = row1[j][1]
+            doc = u[i]
+            for j in range(0, len(doc)):
+                (topic_no, prob) = doc[j]
+                u_matrix[i, topic_no] = prob
 
         return u_matrix
 
