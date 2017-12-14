@@ -53,17 +53,11 @@ class ModelUtils(object):  # contains all the utilities related to TF/TF-IDF cal
         movies = self.object_data['movieid'].unique()
         doc_count = len(movies)
 
-        tag_count = 0
-        for movie in movies:
-            movie_data = self.object_data[self.object_data['movieid'] == movie]
-            unique_tags = movie_data['tag'].unique()
-            for tag in unique_tags:
-                if tag == tag_of_movie:
-                    tag_count += 1
-                    break
+        tag_data = self.object_data[self.object_data['tag'] == tag_of_movie]
+        tag_count = len(tag_data['movieid'].unique())
 
         return math.log(float(doc_count) / float(
-            tag_count))  # total_number_of_documents / total_number_document_containing_the_term
+            tag_count), 2)  # total_number_of_documents / total_number_document_containing_the_term
 
     def get_tfidf_value(self, movie_id, tag_of_movie):  # calculate TF-IDF
         return self.get_tf_value(movie_id, tag_of_movie) * self.get_idf_value(tag_of_movie)  # tf * idf

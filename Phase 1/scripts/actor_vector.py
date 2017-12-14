@@ -13,7 +13,7 @@ class ActorTag(generic_vector.GenericTag):  # Represents a class to establish re
         self.combined_data = self.get_combined_data()
         self.actor_data = self.get_combined_data_for_object()
         self.time_utils = utils.TimestampUtils(self.combined_data)
-        self.model_utils = utils.ModelUtils(self.actor_data)
+        self.model_utils = utils.ModelUtils(self.combined_data)
 
     def get_combined_data(self):  # complete data set
         mltags = self.data_extractor.get_mltags_data()

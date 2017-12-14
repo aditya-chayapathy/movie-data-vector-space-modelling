@@ -96,9 +96,9 @@ class DifferentiatingGenreTag(
 
     def pdiff_formula(self, r_j, m_j):  # formula calculation with respect to P-DIFF1 and P-DIFF2
         try:
-            result = math.log(abs((((r_j + 0.5) / (self.r - r_j + 1))) / (
-            ((m_j - r_j + 0.5) / (self.m - m_j - self.r + r_j + 1))))) * abs(
-                ((r_j) / (self.r)) - ((m_j - r_j) / (self.m - self.r)))
+            result = math.log(abs(((r_j + 0.5) / float(self.r - r_j + 1)) / (
+                ((m_j - r_j + 0.5) / float(self.m - m_j - self.r + r_j + 1))))) * abs(
+                (r_j / float(self.r)) - ((m_j - r_j) / float(self.m - self.r)))
         except:
             return 0
         return result

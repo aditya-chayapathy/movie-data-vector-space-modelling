@@ -13,7 +13,7 @@ class GenreTag(generic_vector.GenericTag):  # Represents a class to establish re
         self.combined_data = self.get_combined_data()
         self.time_utils = utils.TimestampUtils(self.combined_data)
         self.genre_data = self.get_combined_data_for_object()
-        self.model_utils = utils.ModelUtils(self.genre_data)
+        self.model_utils = utils.ModelUtils(self.combined_data)
 
     def get_combined_data(self):  # complete data set
         mltags = self.data_extractor.get_mltags_data()
