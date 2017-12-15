@@ -47,6 +47,7 @@ Example: python phase_3_task_5.py RNN
 #### Troubleshooting:
 1. The tag weight calculations are performed dynamically whenever the input is passed to the command line interface. Also, this project uses in-memory data frames (via python pandas library) for storage and retrieval. You may observe delay in the output of the command line interface based on the input. Please be patient.
 2. Please ensure the data set (csv files) have the same names and column descriptors as the sample data set for correct execution.
-3. Ensure you are running the correct python interpreter. The correct interpreter will give the following output on the command line:
+3. For task 5, please ensure that the movie labels are provided through "label_movies.json" as per the format specified in the sample file.
+4. Ensure you are running the correct python interpreter. The correct interpreter will give the following output on the command line:
 	 python --version
 	 Python 3.6.2 :: Anaconda, Inc.
