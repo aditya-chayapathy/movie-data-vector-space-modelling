@@ -1,14 +1,12 @@
 import argparse
 import operator
 from collections import Counter
-import cvxopt
-
-cvxopt.solvers.options['show_progress'] = False
 
 import config_parser
 import data_extractor
 import numpy
 from scipy.spatial import distance as dist
+from sklearn.svm import SVC
 from util import *
 
 util = Util()
@@ -78,12 +76,34 @@ class Classifier(object):
         else:
             return self.predict_using_DTC(tree.left, movie)
 
+    def find_label_SVM(self, movie_id, classifier):
+        return classifier.predict([self.movie_latent_matrix[movies.index(movie_id)]])
+
+    def generate_SVM_classifier(self):
+        X = []
+        y = []
+        for movie_id in self.movie_label_dict.keys():
+            label = self.movie_label_dict[movie_id]
+            y.append(label)
+            X.append(self.movie_latent_matrix[movies.index(movie_id)])
+
+        X = numpy.array(X)
+        y = numpy.array(y)
+        clf = SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0, decision_function_shape='ovr', degree=3,
+                  gamma='auto', kernel='rbf', max_iter=-1, probability=False, random_state=None, shrinking=True,
+                  tol=0.001, verbose=False)
+        clf.fit(X, y)
+
+        return clf
+
     def demo_output(self, model):
         predicted_label = None
         tree = None
         if model == "DTC":
             node = Node(self.movie_label_dict)
             tree = node.construct_tree()
+        if model == "SVM":
+            cls = self.generate_SVM_classifier()
         while True:
             query_movie_id = input("Enter the movie ID for prediction: ")
             query_movie_id = int(query_movie_id)
@@ -94,6 +114,8 @@ class Classifier(object):
                 predicted_label = self.find_label_RNN(query_movie_id)
             elif model == "DTC":
                 predicted_label = self.predict_using_DTC(tree, query_movie_id)
+            elif model == "SVM":
+                predicted_label = self.find_label_SVM(query_movie_id, cls)
             print("Entered movie: " + str(query_movie_id) + " - " + self.util.get_movie_name_for_id(query_movie_id))
             print("Predicted label: " + str(predicted_label))
             confirmation = input("Are you done querying? (y/Y/n/N): ")
@@ -196,165 +218,6 @@ class Node(object):
 
         return self
 
-class SupportVectorMachine(object):
-    """The Support Vector Machine classifier.
-    """
-    def __init__(self, C=1, kernel=rbf_kernel, power=4, gamma=None, coef=4):
-        self.C = C
-        self.kernel = kernel
-        self.power = power
-        self.gamma = gamma
-        self.coef = coef
-        self.lagr_multipliers = None
-        self.support_vectors = None
-        self.support_vector_labels = None
-        self.intercept = None
-
-    def fit(self, X, y):
-
-        n_samples, n_features = numpy.shape(X)
-
-        # Set gamma to 1/n_features by default
-        if not self.gamma:
-            self.gamma = 1 / n_features
-
-        # Initialize kernel method with parameters
-        self.kernel = self.kernel(
-            power=self.power,
-            gamma=self.gamma,
-            coef=self.coef)
-
-        # Calculate kernel matrix
-        kernel_matrix = numpy.zeros((n_samples, n_samples))
-        for i in range(n_samples):
-            for j in range(n_samples):
-                kernel_matrix[i, j] = self.kernel(X[i], X[j])
-
-        # Define the quadratic optimization problem
-        P = cvxopt.matrix(numpy.outer(y, y) * kernel_matrix, tc='d')
-        q = cvxopt.matrix(numpy.ones(n_samples) * -1)
-        A = cvxopt.matrix(y, (1, n_samples), tc='d')
-        b = cvxopt.matrix(0, tc='d')
-
-        if not self.C:
-            G = cvxopt.matrix(numpy.identity(n_samples) * -1)
-            h = cvxopt.matrix(numpy.zeros(n_samples))
-        else:
-            G_max = numpy.identity(n_samples) * -1
-            G_min = numpy.identity(n_samples)
-            G = cvxopt.matrix(numpy.vstack((G_max, G_min)))
-            h_max = cvxopt.matrix(numpy.zeros(n_samples))
-            h_min = cvxopt.matrix(numpy.ones(n_samples) * self.C)
-            h = cvxopt.matrix(numpy.vstack((h_max, h_min)))
-
-        # Solve the quadratic optimization problem using cvxopt
-        minimization = cvxopt.solvers.qp(P, q, G, h, A, b)
-
-        # Lagrange multipliers
-        lagr_mult = numpy.ravel(minimization['x'])
-
-        # Extract support vectors
-        # Get indexes of non-zero lagr. multipiers
-        idx = lagr_mult > 1e-10
-        # Get the corresponding lagr. multipliers
-        self.lagr_multipliers = lagr_mult[idx]
-        # Get the samples that will act as support vectors
-        self.support_vectors = X[idx]
-        # Get the corresponding labels
-        self.support_vector_labels = y[idx]
-
-        # Calculate intercept with first support vector
-        self.intercept = self.support_vector_labels[0]
-        for i in range(len(self.lagr_multipliers)):
-            self.intercept -= self.lagr_multipliers[i] * self.support_vector_labels[
-                i] * self.kernel(self.support_vectors[i], self.support_vectors[0])
-
-    def predict(self, X):
-        y_pred = []
-        # Iterate through list of samples and make predictions
-        for sample in X:
-            prediction = 0
-            # Determine the label of the sample by the support vectors
-            for i in range(len(self.lagr_multipliers)):
-                prediction += self.lagr_multipliers[i] * self.support_vector_labels[
-                    i] * self.kernel(self.support_vectors[i], sample)
-            prediction += self.intercept
-            y_pred.append(numpy.sign(prediction))
-        return numpy.array(y_pred)
-
-
-class RunSvm(object):
-
-    def get_all_pairs_of_labels(self):
-        labels = list(label_movies_json_data.keys())
-        labels.sort()
-        label_pairs = []
-        for i in range(0, len(labels) - 1):
-            for j in range(i + 1, len(labels)):
-                label_pairs.append((labels[i], labels[j]))
-
-        return label_pairs
-
-    def get_label_vectors_dict(self, label0, label1):
-        indexes_of_label0_movies = [movies.index(each) for each in label_movies_json_data[label0]]
-        indexes_of_label1_movies = [movies.index(each) for each in label_movies_json_data[label1]]
-        matrix_of_label0_movies = movie_latent_matrix[indexes_of_label0_movies, :]
-        matrix_of_label1_movies = movie_latent_matrix[indexes_of_label1_movies, :]
-
-        label_vectors_dict = {}
-        label_vectors_dict[-1] = matrix_of_label0_movies
-        label_vectors_dict[1] = matrix_of_label1_movies
-
-        return label_vectors_dict
-
-    def get_labelpair_clf_dict(self):
-        label_pairs = self.get_all_pairs_of_labels()
-        labelpair_clf_dict = {}
-        for label0, label1 in label_pairs:
-            label_vectors_dict = self.get_label_vectors_dict(label0, label1)
-            concatenated_data = numpy.concatenate((label_vectors_dict[-1], label_vectors_dict[1]), axis=0)
-            concatenated_labels = []
-            for i in range(0, len(label_vectors_dict[-1])):
-                concatenated_labels.append(-1)
-            for j in range(0, len(label_vectors_dict[1])):
-                concatenated_labels.append(1)
-            concatenated_labels = numpy.array(concatenated_labels)
-            clf = SupportVectorMachine(kernel=rbf_kernel, power=4, coef=1)
-            clf.fit(concatenated_data, concatenated_labels)
-            labelpair_clf_dict[(label0, label1)] = clf
-
-            return labelpair_clf_dict
-
-    def get_label(self, labelpair_clf_dict, query_movie_id):
-        movie_vector = movie_latent_matrix[movies.index(query_movie_id)]
-        label_count = Counter()
-        for label0, label1 in labelpair_clf_dict.keys():
-            clf = labelpair_clf_dict[(label0, label1)]
-            label_sign = clf.predict([movie_vector])
-            if label_sign[0] == -1:
-                label_count[label0] += 1
-            else:
-                label_count[label1] += 1
-        label_count_dict_sorted = sorted(label_count.items(), key=operator.itemgetter(1), reverse=True)
-        (label, max) = label_count_dict_sorted[0]
-
-        return label
-
-    def starting_function(self):
-        labelpair_clf_dict = self.get_labelpair_clf_dict()
-        while True:
-            query_movie_id = input("Enter the movie ID you want to know the predicted label: ")
-            query_movie_id = int(query_movie_id)
-            if query_movie_id not in movies:
-                print("Invalid movie ID entered, hence skipping this movie!")
-                continue
-            predicted_label = self.get_label(labelpair_clf_dict, query_movie_id)
-            print("Entered movie: " + str(query_movie_id) + " - " + util.get_movie_name_for_id(query_movie_id))
-            print("Predicted label: " + str(predicted_label))
-            confirmation = input("Are you done querying? (y/Y/n/N): ")
-            if confirmation == "y" or confirmation == "Y":
-                break
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -365,8 +228,8 @@ if __name__ == "__main__":
     model = ip['model']
     r = 1
     if model == "SVM":
-        run_svm_obj = RunSvm()
-        run_svm_obj.starting_function()
+        obj = Classifier(r)
+        obj.demo_output(model)
     elif model == "RNN":
         r = int(input("Enter the value for r: "))
         obj = Classifier(r)
