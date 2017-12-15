@@ -1,16 +1,16 @@
 # Vector space modeling of MovieLens & IMDB movie data
 
 This project demonstrates the following Multimedia and Web Database concepts using MovieLens and IMDB movie data: 
- - Multi-dimentional data representation
- - Dimentionality reduction using SVD, LDA and PCA
+ - Multi-dimensional data representation
+ - Dimensionality reduction using SVD, LDA and PCA
  - Feature significance using TF and TF-IDF measures
- - Latent semantics analysis using SVD, PCA and LDA
+ - Latent semantic analysis using SVD, PCA and LDA
  - Tensor decomposition analysis using CP decomposition
  - Node ranking/significance using Personalized PageRank
  - Movie Recommendation system using SVD, LDA, PCA, Tensor decomposition and PageRank
- - Probablistic Relevance Feedback
+ - Probabilistic Relevance Feedback
  - Multi-dimensional index structures using LSH
- - Nearest neighbor search using LSH
+ - Nearest Neighbor search using LSH
  - Nearest Neighbor based relevance feedback using query rewrite technique
  - Movie classification using SVM, Decision Trees and KNN classifiers
  
